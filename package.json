@@ -1,0 +1,36 @@
+{
+  "name": "gemini-forge",
+  "version": "0.2.0",
+  "description": "A high-performance CLI tool to detect, package, and deploy Gemini CLI skills with structural signature scanning.",
+  "main": "index.js",
+  "bin": {
+    "gemini-forge": "./bin/gemini-forge"
+  },
+  "files": [
+    "bin/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "gemini",
+    "gemini-cli",
+    "ai-agents",
+    "agent-skills",
+    "automation",
+    "cli-tool",
+    "packager"
+  ],
+  "author": "tercel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tercel/gemini-forge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tercel/gemini-forge/issues"
+  },
+  "homepage": "https://github.com/tercel/gemini-forge#readme"
+}

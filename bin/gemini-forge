@@ -1,0 +1,220 @@
+#!/bin/bash
+
+# Configuration
+DIST_DIR="dist"
+
+# Function: Show professional help message
+function show_help() {
+    cat << EOF
+Gemini Forge (GSF) - A high-performance CLI tool for Gemini CLI resources.
+
+Usage:
+  gemini-forge <command> [path] [scope]
+
+Commands:
+  check [path]          Verify if a directory is a valid Gemini resource.
+  build [path]          Build .skill files for the specified project. (Alias: package)
+  install [path] [scope] Install packaged skills and sync commands.
+  deploy [path] [scope]  Shortcut for 'build' followed by 'install'.
+  uninstall [path] [scope] Uninstall resources associated with the project.
+  version               Show the current version of gemini-forge.
+
+Arguments:
+  path                  Path to the project directory (default: ".").
+  scope                 Installation scope: "user" (default) or "workspace".
+
+Options:
+  -h, --help            Show this help message.
+  -v, --version         Show version information.
+
+Examples:
+  gemini-forge check .
+  gemini-forge deploy ./my-skill user
+  gemini-forge uninstall ../other-project workspace
+EOF
+}
+
+# Function: Show version from package.json
+function show_version() {
+    local script_path=$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo "$0")
+    local script_dir=$(dirname "$script_path")
+    local pkg_json="${script_dir}/../package.json"
+    if [ -f "$pkg_json" ]; then
+        grep '"version":' "$pkg_json" | head -1 | cut -d '"' -f 4
+    else
+        echo "1.0.0-dev"
+    fi
+}
+
+# Check if gemini CLI is installed
+if ! command -v gemini &> /dev/null; then
+    echo "❌ Error: 'gemini' CLI not found. Please install it first."
+    exit 1
+fi
+
+# Function: Detect if a directory contains a valid Gemini Skill or Extension
+function is_gemini_skill() {
+    local dir="$1"
+    local skill_file="${dir}/SKILL.md"
+    if [ -f "$skill_file" ]; then
+        local header
+        header=$(head -n 20 "$skill_file")
+        if echo "$header" | grep -q "name:" && echo "$header" | grep -q "description:"; then
+            return 0
+        fi
+    fi
+    if [ -d "${dir}/commands" ] && (shopt -s nullglob; set -- "${dir}/commands"/*.toml; [ $# -gt 0 ]); then
+        return 0
+    fi
+    if [ -d "${dir}/skills" ] && (shopt -s nullglob; set -- "${dir}/skills"/*/SKILL.md; [ $# -gt 0 ]); then
+        return 0
+    fi
+    return 1
+}
+
+# Function: Resolve Project Metadata
+function resolve_metadata() {
+    local target_dir="$1"
+    local pkg_json="${target_dir}/package.json"
+    PROJECT_NAME=""
+    if [ -f "$pkg_json" ]; then
+        PROJECT_NAME=$(grep '"name":' "$pkg_json" | head -1 | cut -d '"' -f 4 | sed 's/-gemini//')
+    fi
+    if [ -z "$PROJECT_NAME" ]; then
+        PROJECT_NAME=$(basename "$(cd "$target_dir" && pwd)" | sed 's/-gemini//')
+    fi
+}
+
+# Function: Find Gemini Packager
+function find_packager() {
+    local gemini_bin=$(command -v gemini)
+    if [ -n "$gemini_bin" ]; then
+        local real_bin=$(readlink -f "$gemini_bin" 2>/dev/null || realpath "$gemini_bin" 2>/dev/null || echo "$gemini_bin")
+        local current_dir="$real_bin"
+        for i in {1..5}; do
+            current_dir=$(dirname "$current_dir")
+            local target="$current_dir/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs"
+            if [ -f "$target" ]; then echo "$target"; return; fi
+        done
+    fi
+    local npm_path=$(npm list -g @google/gemini-cli --parseable 2>/dev/null | head -n 1)
+    if [ -n "$npm_path" ]; then
+        local target="$npm_path/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs"
+        if [ -f "$target" ]; then echo "$target"; return; fi
+    fi
+    local fallbacks=("/usr/local/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs" "/opt/homebrew/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs")
+    for fb in "${fallbacks[@]}"; do if [ -f "$fb" ]; then echo "$fb"; return; fi; done
+}
+
+PACKAGER_PATH=$(find_packager)
+if [ -z "$PACKAGER_PATH" ] || [ ! -f "$PACKAGER_PATH" ]; then
+    echo "❌ Error: Could not find 'package_skill.cjs'."
+    exit 1
+fi
+
+# Function: Cleanly package a skill directory
+function package_single_skill() {
+    local src_dir="$1"
+    local skill_name="$2"
+    local dist_path="$3"
+    echo "   -> Packaging: $skill_name"
+    local tmp_stage=$(mktemp -d)
+    cp "$src_dir/SKILL.md" "$tmp_stage/" 2>/dev/null
+    [ -d "$src_dir/assets" ] && cp -r "$src_dir/assets" "$tmp_stage/" 2>/dev/null
+    [ -d "$src_dir/references" ] && cp -r "$src_dir/references" "$tmp_stage/" 2>/dev/null
+    [ -d "$src_dir/scripts" ] && cp -r "$src_dir/scripts" "$tmp_stage/" 2>/dev/null
+    node "$PACKAGER_PATH" "$tmp_stage" "$dist_path" > /dev/null
+    mv "$dist_path/$(basename "$tmp_stage").skill" "$dist_path/${skill_name}.skill" 2>/dev/null
+    rm -rf "$tmp_stage"
+}
+
+function package_all() {
+    local target_dir="${1:-"."}"
+    resolve_metadata "$target_dir"
+    echo "📦 Building Gemini resources for '$PROJECT_NAME'..."
+    local dist_path="$(cd "$target_dir" && pwd)/$DIST_DIR"
+    rm -rf "$dist_path" && mkdir -p "$dist_path"
+    local found_any=0
+    if [ -d "$target_dir/skills" ]; then
+        for dir in "$target_dir/skills"/*/; do
+            if [ -f "${dir}SKILL.md" ]; then
+                package_single_skill "${dir%/}" "$(basename "$dir")" "$dist_path"
+                found_any=1
+            fi
+        done
+    fi
+    if [ -f "$target_dir/SKILL.md" ]; then
+        package_single_skill "$target_dir" "$PROJECT_NAME" "$dist_path"
+        found_any=1
+    fi
+    [ $found_any -eq 0 ] && echo "⚠️ No valid skills found." && exit 1
+    echo "✅ Build complete: $dist_path"
+}
+
+function install_all() {
+    local target_dir="${1:-"."}"
+    local scope=${2:-user}
+    resolve_metadata "$target_dir"
+    echo "🚀 Installing '$PROJECT_NAME' ($scope)..."
+    local dist_path="$(cd "$target_dir" && pwd)/$DIST_DIR"
+    if [ ! -d "$dist_path" ]; then echo "❌ Run 'build' first."; exit 1; fi
+    for skill in "$dist_path"/*.skill; do
+        gemini skills install "$skill" --scope "$scope" --consent
+    done
+    if [ -d "$target_dir/commands" ]; then
+        local cmd_base=$([ "$scope" == "user" ] && echo "$HOME/.gemini/commands" || echo "./.gemini/commands")
+        local target_cmd_dir="$cmd_base/$PROJECT_NAME"
+        mkdir -p "$target_cmd_dir"
+        cp "$target_dir/commands"/*.toml "$target_cmd_dir/" 2>/dev/null
+        echo "🚀 Syncing commands to $target_cmd_dir"
+    fi
+    echo "✨ Done!"
+}
+
+function uninstall_all() {
+    local target_dir="${1:-"."}"
+    local scope=${2:-user}
+    resolve_metadata "$target_dir"
+    
+    echo "🗑️ Uninstalling '$PROJECT_NAME' ($scope)..."
+    
+    # 1. Uninstall root skill only if it exists
+    if [ -f "$target_dir/SKILL.md" ]; then
+        echo "   -> Uninstalling skill: $PROJECT_NAME"
+        gemini skills uninstall "$PROJECT_NAME" --scope "$scope" 2>/dev/null || true
+    fi
+    
+    # 2. Uninstall sub-skills
+    if [ -d "$target_dir/skills" ]; then
+        for dir in "$target_dir/skills"/*/; do
+            local sub_name=$(basename "$dir")
+            echo "   -> Uninstalling sub-skill: $sub_name"
+            gemini skills uninstall "$sub_name" --scope "$scope" 2>/dev/null || true
+        done
+    fi
+    
+    # 3. Clean up commands (Direct IO is much faster than CLI wrappers)
+    local cmd_base=$([ "$scope" == "user" ] && echo "$HOME/.gemini/commands" || echo "./.gemini/commands")
+    if [ -d "$cmd_base/$PROJECT_NAME" ]; then
+        echo "   -> Removing commands: $PROJECT_NAME"
+        rm -rf "$cmd_base/$PROJECT_NAME"
+    fi
+    
+    # 4. Clean up legacy flattened files
+    rm -f "$cmd_base/${PROJECT_NAME}:"*.toml 2>/dev/null
+    rm -f "$cmd_base/${PROJECT_NAME}-"*.toml 2>/dev/null
+    
+    echo "✅ Uninstallation complete!"
+}
+
+# Main
+case "$1" in
+    build|package) package_all "$2" ;;
+    install) install_all "$2" "$3" ;;
+    uninstall) uninstall_all "$2" "$3" ;;
+    deploy) package_all "$2" && install_all "$2" "$3" ;;
+    check) is_gemini_skill "${2:-"."}" && echo "✅ Valid" || (echo "❌ Invalid" && exit 1) ;;
+    version|-v|--version) show_version ;;
+    -h|--help|help) show_help ;;
+    *) [ -n "$1" ] && echo "❌ Unknown command: $1"; show_help; exit 1 ;;
+esac
