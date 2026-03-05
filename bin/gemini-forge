@@ -123,6 +123,7 @@ function package_single_skill() {
     [ -d "$src_dir/assets" ] && cp -r "$src_dir/assets" "$tmp_stage/" 2>/dev/null
     [ -d "$src_dir/references" ] && cp -r "$src_dir/references" "$tmp_stage/" 2>/dev/null
     [ -d "$src_dir/scripts" ] && cp -r "$src_dir/scripts" "$tmp_stage/" 2>/dev/null
+    [ -d "$src_dir/skills" ] && cp -r "$src_dir/skills" "$tmp_stage/" 2>/dev/null
     node "$PACKAGER_PATH" "$tmp_stage" "$dist_path" > /dev/null
     mv "$dist_path/$(basename "$tmp_stage").skill" "$dist_path/${skill_name}.skill" 2>/dev/null
     rm -rf "$tmp_stage"
@@ -135,18 +136,21 @@ function package_all() {
     local dist_path="$(cd "$target_dir" && pwd)/$DIST_DIR"
     rm -rf "$dist_path" && mkdir -p "$dist_path"
     local found_any=0
-    if [ -d "$target_dir/skills" ]; then
-        for dir in "$target_dir/skills"/*/; do
+
+    if [ -f "$target_dir/SKILL.md" ]; then
+        # Mode 1: Composite Skill (Root SKILL.md exists)
+        package_single_skill "$target_dir" "$PROJECT_NAME" "$dist_path"
+        found_any=1
+    elif [ -d "$target_dir/skills" ]; then
+        # Mode 2: Workspace / Monorepo (No root SKILL.md, but skills dir exists)
+        for dir in "$target_dir/skills"/*/ ; do
             if [ -f "${dir}SKILL.md" ]; then
                 package_single_skill "${dir%/}" "$(basename "$dir")" "$dist_path"
                 found_any=1
             fi
         done
     fi
-    if [ -f "$target_dir/SKILL.md" ]; then
-        package_single_skill "$target_dir" "$PROJECT_NAME" "$dist_path"
-        found_any=1
-    fi
+
     [ $found_any -eq 0 ] && echo "⚠️ No valid skills found." && exit 1
     echo "✅ Build complete: $dist_path"
 }

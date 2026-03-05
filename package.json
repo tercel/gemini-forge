@@ -1,6 +1,6 @@
 {
   "name": "gemini-forge",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A high-performance CLI tool to detect, package, and deploy Gemini CLI skills with structural signature scanning.",
   "bin": {
     "gemini-forge": "./bin/index.js"
