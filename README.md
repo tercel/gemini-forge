@@ -48,7 +48,18 @@ Build, install, and sync commands to the user's scope:
 gemini-forge deploy user
 ```
 
-### 4. Advanced Installation
+### 4. Upgrading & Maintenance
+When updating an existing skill, a simple `deploy` is usually sufficient to overwrite existing files. However, **if you have deleted files** (such as `.toml` commands or sub-agent directories), it is recommended to uninstall first to ensure a clean state:
+
+```bash
+# Recommended sequence for major changes or file deletions:
+gemini-forge uninstall . user
+gemini-forge deploy . user
+```
+
+> **Pro Tip**: Use `uninstall` before `deploy` to prune "zombie" command definitions from the `~/.gemini` directory that no longer exist in your source code.
+
+### 5. Advanced Installation
 Install with specific scopes:
 ```bash
 gemini-forge install user      # Install to global user scope

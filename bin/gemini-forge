@@ -179,25 +179,31 @@ function uninstall_all() {
     local target_dir="${1:-"."}"
     local scope=${2:-user}
     resolve_metadata "$target_dir"
-    
+
     echo "🗑️ Uninstalling '$PROJECT_NAME' ($scope)..."
-    
+
+    local skill_base=$([ "$scope" == "user" ] && echo "$HOME/.gemini/skills" || echo "./.gemini/skills")
+
     # 1. Uninstall root skill only if it exists
     if [ -f "$target_dir/SKILL.md" ]; then
         echo "   -> Uninstalling skill: $PROJECT_NAME"
         gemini skills uninstall "$PROJECT_NAME" --scope "$scope" 2>/dev/null || true
+        # Physical cleanup
+        [ -d "$skill_base/$PROJECT_NAME" ] && rm -rf "$skill_base/$PROJECT_NAME"
     fi
-    
+
     # 2. Uninstall sub-skills
     if [ -d "$target_dir/skills" ]; then
         for dir in "$target_dir/skills"/*/; do
             local sub_name=$(basename "$dir")
             echo "   -> Uninstalling sub-skill: $sub_name"
             gemini skills uninstall "$sub_name" --scope "$scope" 2>/dev/null || true
+            # Physical cleanup
+            [ -d "$skill_base/$sub_name" ] && rm -rf "$skill_base/$sub_name"
         done
     fi
-    
-    # 3. Clean up commands (Direct IO is much faster than CLI wrappers)
+
+    # 3. Clean up commands
     local cmd_base=$([ "$scope" == "user" ] && echo "$HOME/.gemini/commands" || echo "./.gemini/commands")
     if [ -d "$cmd_base/$PROJECT_NAME" ]; then
         echo "   -> Removing commands: $PROJECT_NAME"
