@@ -1,94 +1,62 @@
 # Gemini Forge (GSF)
 
-`gemini-forge` is a high-performance, cross-platform CLI tool designed to streamline the lifecycle of **Gemini CLI Skills**. It automates the detection, packaging, and deployment of skills while ensuring strict compatibility with the official Gemini CLI specification.
+**Gemini Forge (GSF)** is a high-performance ecosystem of specialized skills and management tools for the **Gemini CLI**. It provides a suite of "Forge" orchestrators designed for professional software engineering, architectural specification, ecosystem management, and technical evangelism.
 
-## Core Features
+## 🛠️ The Forge Suite
 
-- 🧠 **Structural Signature Scanning**: Automatically detects valid Gemini skills by analyzing directory structures, `.toml` command definitions, and core sub-agent references.
-- 📦 **Automated Packaging**: Builds `.skill` files from single or multi-skill project structures.
-- 🚀 **One-Click Deployment**: Installs skills and syncs custom commands to the local or workspace `.gemini` directory in a single step.
-- 🐧 **Cross-Platform Robustness**: Fully compatible with both macOS (BSD) and Linux (GNU).
-- 🛠️ **Smart Syncing**: Automatically manages custom `.toml` commands and ensures they are correctly registered with the Gemini CLI.
+The project consists of several core "Forge" skills, each optimized for a specific part of the development and business lifecycle:
 
-## Installation
+| Skill | Focus Area | Key Capabilities |
+| :--- | :--- | :--- |
+| **[code-forge](./skills/code-forge/SKILL.md)** | **SDLC Orchestrator** | TDD-driven implementation, 14-dimension code review, systematic debugging, and automated planning. |
+| **[spec-forge](./skills/spec-forge/SKILL.md)** | **Product & Tech Design** | Idea validation, project decomposition, technical design (Google/Uber style), and feature specification. |
+| **[apcore-skills](./skills/apcore-skills/SKILL.md)** | **Ecosystem Sync** | Cross-language SDK management, API consistency auditing, and coordinated multi-repo releases. |
+| **[git-researcher](./skills/git-researcher/SKILL.md)** | **GitHub Intel** | High-performance repository research, competitive analysis, and trend discovery. |
+| **[hype-forge](./skills/hype-forge/SKILL.md)** | **Growth & Evangelism** | Transforming code into high-impact content (articles, X threads) and technical audits. |
+| **[research-forge](./skills/research-forge/SKILL.md)** | **Technical Due Diligence** | Deep project intelligence, architectural analysis, and investor-ready reports. |
+| **[gskills-forge](./skills/gskills-forge/SKILL.md)** | **Skill Development** | Professional scaffolding and optimization for building new Gemini CLI skills. |
 
-### Global Installation (Recommended)
+---
 
-```bash
-npm install -g gemini-forge
-# or
-pnpm add -g gemini-forge
-```
+## 🚀 Management Tool: `gemini-forge` CLI
 
-### Local Development Usage
+In addition to the skills themselves, this repository includes the **`gemini-forge` CLI**, a utility designed to streamline the lifecycle of Gemini CLI Skills.
 
-```bash
-git clone https://github.com/tercel/gemini-forge.git
-cd gemini-forge
-npm link
-```
+### Key Features
+- 🧠 **Structural Signature Scanning**: Automatically detects valid Gemini skills.
+- 📦 **Automated Packaging**: Builds `.skill` files from monorepo or single-skill structures.
+- 🚀 **One-Click Deployment**: Installs and syncs commands to your `.gemini` directory.
 
-## Usage
+### Quick Start
 
-### 1. Verify a Skill
-Check if a directory is a valid Gemini Skill:
-```bash
-gemini-forge check ./my-skill-dir
-```
+1. **Install the CLI Tool**:
+   ```bash
+   npm install -g .
+   ```
 
-### 2. Build and Package
-Generate `.skill` files in the `dist/` directory:
-```bash
-gemini-forge package
-```
+2. **Deploy the Entire Forge Suite**:
+   ```bash
+   gemini-forge deploy . user
+   ```
 
-### 3. Deploy Everything
-Build, install, and sync commands to the user's scope:
-```bash
-gemini-forge deploy user
-```
+3. **Verify Installation**:
+   ```bash
+   gemini help
+   # You should see commands like /code-forge:plan, /spec-forge:prd, etc.
+   ```
 
-### 4. Upgrading & Maintenance
-When updating an existing skill, a simple `deploy` is usually sufficient to overwrite existing files. However, **if you have deleted files** (such as `.toml` commands or sub-agent directories), it is recommended to uninstall first to ensure a clean state:
+Detailed CLI documentation can be found in **[CLI.md](./CLI.md)**.
 
-```bash
-# Recommended sequence for major changes or file deletions:
-gemini-forge uninstall . user
-gemini-forge deploy . user
-```
+---
 
-> **Pro Tip**: Use `uninstall` before `deploy` to prune "zombie" command definitions from the `~/.gemini` directory that no longer exist in your source code.
+## 📂 Project Structure
 
-### 5. Advanced Installation
-Install with specific scopes:
-```bash
-gemini-forge install user      # Install to global user scope
-gemini-forge install workspace # Install to local project scope
-```
+- `bin/`: Source code for the `gemini-forge` CLI management tool.
+- `skills/`: The collection of high-performance Gemini skills.
+  - Each skill directory (e.g., `code-forge/`) contains its own `SKILL.md` and specialized resources.
 
-## How It Identifies a Gemini Skill
+---
 
-`gemini-forge` uses **Structural Signature Scanning** to differentiate Gemini skills from other platforms (like Claude Code) or generic Markdown files. A directory is recognized as a Gemini Skill if it contains:
-
-1. **TOML Commands**: A `commands/` directory containing `.toml` files.
-2. **Standard Metadata**: A `SKILL.md` file with mandatory `name` and `description` YAML frontmatter.
-3. **Core Sub-Agents**: References to Gemini sub-agents (e.g., `gsd-planner`, `codebase_investigator`) in `SKILL.md`.
-4. **Nested Skills**: A `skills/` directory containing sub-directories with their own `SKILL.md`.
-
-## Project Structure Standards
-
-For the best experience, follow this standard layout for your Gemini projects:
-
-```text
-my-project/
-├── commands/           # Custom .toml commands
-├── skills/             # (Optional) Sub-agents/Skills
-│   └── my-sub-agent/
-│       └── SKILL.md
-├── SKILL.md            # Main Skill definition
-└── package.json        # Project metadata
-```
-
-## License
+## 📄 License
 
 MIT © [tercel](https://github.com/tercel)
