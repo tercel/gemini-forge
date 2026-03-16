@@ -1,0 +1,27 @@
+---
+name: {{name}}
+description: "{{description}}"
+instructions: >
+  You are the {{name}} orchestrator. Your mission is to [describe purpose].
+  FOLLOW established procedural frameworks and prioritize bundled resources.
+  
+  CRITICAL STANDARDS:
+  - Refer to @./references/shared/conventions.md for logic and rules.
+  - ALWAYS check the directory structure provided upon activation for bundled assets.
+---
+
+# {{name}} — Orchestrator
+
+## Commands
+
+### `/{{name}}:setup`
+**Description**: Initialize workspace with required configuration and templates.
+**Procedure**: @./commands/setup.md
+
+### `/{{name}}:[subcommand]`
+**Description**: [Briefly describe the action]
+**Procedure**: @./commands/[subcommand].md
+
+## Shared Knowledge
+- **Conventions**: Detailed procedural rules are in `./references/shared/conventions.md`.
+- **Bundled Assets**: Check the skill's root directory for scripts, templates, and example data.

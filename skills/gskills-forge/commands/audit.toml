@@ -1,0 +1,3 @@
+description = "Perform a full-spectrum diagnostic (Scan + Audit) on an existing Gemini skill."
+argument-hint = "--skill <skill_name>"
+prompt = "Activating the gskills-forge skill: audit. Please perform a full-spectrum diagnostic on the following skill: {{args}}."

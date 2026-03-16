@@ -121,6 +121,7 @@ function package_single_skill() {
     local tmp_stage=$(mktemp -d)
     cp "$src_dir/SKILL.md" "$tmp_stage/" 2>/dev/null
     [ -d "$src_dir/assets" ] && cp -r "$src_dir/assets" "$tmp_stage/" 2>/dev/null
+    [ -d "$src_dir/commands" ] && cp -r "$src_dir/commands" "$tmp_stage/" 2>/dev/null
     [ -d "$src_dir/references" ] && cp -r "$src_dir/references" "$tmp_stage/" 2>/dev/null
     [ -d "$src_dir/scripts" ] && cp -r "$src_dir/scripts" "$tmp_stage/" 2>/dev/null
     [ -d "$src_dir/skills" ] && cp -r "$src_dir/skills" "$tmp_stage/" 2>/dev/null
@@ -212,7 +213,27 @@ function uninstall_all() {
     echo "✅ Uninstallation complete!"
 }
 
+# Helper: Shift arguments if the first one looks like a scope
+function normalize_args() {
+    if [[ "$2" == "user" || "$2" == "workspace" ]]; then
+        # If the second argument is a scope, shift it to the third position and insert "." as path
+        local cmd="$1"
+        local scope="$2"
+        local extra="${3:-}"
+        case "$cmd" in
+            install|uninstall|deploy)
+                echo "$cmd" "." "$scope"
+                return
+                ;;
+        esac
+    fi
+    echo "$@"
+}
+
 # Main
+ARGS=($(normalize_args "$@"))
+set -- "${ARGS[@]}"
+
 case "$1" in
     build|package) package_all "$2" ;;
     install) install_all "$2" "$3" ;;

@@ -1,0 +1,14 @@
+description = "Coordinated multi-repo release pipeline — version bump, changelog, test, commit, push with approval."
+argument-hint = "<version> [--scope core|mcp|integrations|all] [--dry-run]"
+
+prompt = """You are executing /apcore-skills:release. Follow the "MODE: Release" section in your skill instructions EXACTLY.
+
+User arguments: {{args}}
+
+CRITICAL REQUIREMENTS:
+1. Start with Ecosystem Discovery (SHARED PROTOCOL)
+2. NEVER push without explicit user approval
+3. NEVER use git add -A — always stage specific files
+4. Run pre-flight checks, version bump, changelog generation, dependency updates, test verification
+5. Commit locally first, present summary for review
+6. Only push after user explicitly approves"""

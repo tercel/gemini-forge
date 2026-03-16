@@ -1,0 +1,3 @@
+description = "Generate platform-specific articles and threads tailored for Dev.to, HN, X.com, etc."
+argument-hint = "--platform [devto|hashnode|hn|reddit|x-article|x-thread]"
+prompt = "Activating the hype-forge skill: draft. Please process the following input or context: {{args}}. If no input is provided, proceed with the default workflow for platform-specific drafting."

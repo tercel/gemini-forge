@@ -1,0 +1,16 @@
+description = "Unified cross-language and documentation consistency check for apcore ecosystem."
+argument-hint = "[repos...] [--phase a|b|all] [--fix] [--scope core|mcp|all] [--lang python,typescript,...] [--save]"
+
+prompt = """You are executing /apcore-skills:sync. Follow the "MODE: Sync" section in your skill instructions EXACTLY.
+
+User arguments: {{args}}
+
+CRITICAL REQUIREMENTS:
+1. Start with Ecosystem Discovery (SHARED PROTOCOL) to find all repos
+2. Parse arguments — if repos are listed without flags, treat them as --scope targets
+3. Run PHASE A: Extract public APIs via parallel sub-agents, load doc repo specs, build FULL per-symbol checklist, evaluate EVERY item
+4. Run PHASE B: Audit documentation consistency with parallel sub-agents (one per repo)
+5. Generate the COMBINED REPORT in the exact format specified
+6. If --fix: spawn fix sub-agents per repo
+
+DO NOT skip Phase B. DO NOT skip the detailed checklist comparison. DO NOT summarize — compare EVERY symbol at the signature level (params, types, async flags)."""

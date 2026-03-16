@@ -1,0 +1,18 @@
+{
+  "name": "research-forge",
+  "version": "0.1.0",
+  "description": "Project Due Diligence & Investment Analysis Skill — deep technical and business analysis for open-source projects, startups, and SaaS products.",
+  "keywords": [
+    "due-diligence",
+    "investment-analysis",
+    "project-research",
+    "technical-analysis",
+    "market-research"
+  ],
+  "author": {
+    "name": "tercel",
+    "url": "https://github.com/tercel"
+  },
+  "repository": "https://github.com/tercel/research-forge-gemini",
+  "license": "MIT"
+}

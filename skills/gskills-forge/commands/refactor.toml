@@ -1,0 +1,3 @@
+description = "Optimize an existing Gemini skill based on audit findings or specific refactor goals."
+argument-hint = "--skill <skill_name> [--report <audit_file>]"
+prompt = "Activating the gskills-forge skill: refactor. Please optimize the following skill using the provided report or context: {{args}}."

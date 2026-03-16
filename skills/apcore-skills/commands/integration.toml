@@ -1,0 +1,13 @@
+description = "Bootstrap a new framework integration for apcore with 5 core capabilities."
+argument-hint = "<framework> [--lang python|typescript|go] [--ref django-apcore]"
+
+prompt = """You are executing /apcore-skills:integration. Follow the "MODE: Integration" section in your skill instructions EXACTLY.
+
+User arguments: {{args}}
+
+CRITICAL REQUIREMENTS:
+1. Start with Ecosystem Discovery (SHARED PROTOCOL)
+2. Every integration MUST implement 5 core capabilities: endpoint scanner, module registry, context mapping, MCP server, OpenAI export
+3. Analyze reference integration via sub-agent
+4. Scaffold complete project with all required files, APCORE_* config, tests, and demo project
+5. Generate feature specs and code-forge config"""

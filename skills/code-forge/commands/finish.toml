@@ -1,0 +1,2 @@
+description = "Complete a development branch and cleanup."
+prompt = "Activate the code-forge:finish skill. Please process the following input or context: {{args}}. If no input is provided, proceed with the default workflow for finish."

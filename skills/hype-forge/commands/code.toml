@@ -1,0 +1,3 @@
+description = "Transform raw code snippets into narrative-driven explanations — the 'story' of the code"
+argument-hint = "<path to file or snippet>"
+prompt = "Activating the hype-forge skill: code. Please process the following input or context: {{args}}. If no input is provided, proceed with the default workflow for code narrative generation."

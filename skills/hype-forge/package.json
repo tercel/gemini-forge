@@ -1,0 +1,28 @@
+{
+  "name": "hype-forge-gemini",
+  "version": "0.2.1",
+  "description": "Technical Evangelist & Growth Skill — transform code and projects into high-impact content for developer platforms.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "gemini-forge package",
+    "install:user": "gemini-forge install user",
+    "install:workspace": "gemini-forge install workspace",
+    "deploy": "gemini-forge deploy user",
+    "uninstall:user": "gemini-forge uninstall user",
+    "uninstall:workspace": "gemini-forge uninstall workspace"
+  },
+  "keywords": [
+    "marketing",
+    "developer-advocacy",
+    "growth-engineering",
+    "content-strategy",
+    "technical-writing"
+  ],
+  "author": {
+    "name": "tercel",
+    "url": "https://github.com/tercel"
+  },
+  "repository": "https://github.com/tercel/hype-forge",
+  "license": "MIT"
+}

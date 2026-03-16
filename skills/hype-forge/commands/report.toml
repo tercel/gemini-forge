@@ -1,0 +1,3 @@
+description = "Generate a high-authority technical analysis report for developers, tech leads, and investors"
+argument-hint = "--audience [investor|tech-lead|dev-community]"
+prompt = "Activating the hype-forge skill: report. Please process the following input or context: {{args}}. If no input is provided, proceed with the default workflow for report generation."

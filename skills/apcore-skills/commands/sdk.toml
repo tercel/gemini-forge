@@ -1,0 +1,14 @@
+description = "Bootstrap a new language SDK for the apcore ecosystem with full API contract."
+argument-hint = "<language> [--type core|mcp] [--ref apcore-python]"
+
+prompt = """You are executing /apcore-skills:sdk. Follow the "MODE: SDK" section in your skill instructions EXACTLY.
+
+User arguments: {{args}}
+
+CRITICAL REQUIREMENTS:
+1. Start with Ecosystem Discovery (SHARED PROTOCOL)
+2. Extract the FULL API contract from the reference implementation via sub-agent
+3. Confirm tech stack choices with the user
+4. Scaffold complete project skeleton with ALL API stubs (correct signatures, TODO markers)
+5. Generate feature specs and code-forge config
+6. Display summary with next steps"""

@@ -1,0 +1,3 @@
+description = "{{description}}"
+argument-hint = "{{argument_hint}}"
+prompt = "Activating the {{skill_name}} skill: {{command_name}}. Please process the following input or context: {{args}}."

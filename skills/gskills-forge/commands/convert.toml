@@ -1,0 +1,3 @@
+description = "Migrate and 'flatten' Claude Code skills into Gemini's orchestrator pattern."
+argument-hint = "--source <source>"
+prompt = "Activating the gskills-forge skill: convert. Please process the following input or context: {{args}}."

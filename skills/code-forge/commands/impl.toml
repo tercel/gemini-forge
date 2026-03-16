@@ -1,0 +1,2 @@
+description = "Execute pending tasks for a feature."
+prompt = "Activate the code-forge:impl skill. Please process the following input or context: {{args}}. If no input is provided, proceed with the default workflow for impl."

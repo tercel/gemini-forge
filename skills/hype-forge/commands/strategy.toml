@@ -1,0 +1,3 @@
+description = "Analyze a technical project and plan a multi-platform content series for its promotion"
+argument-hint = "--goal <goal>"
+prompt = "Activating the hype-forge skill: strategy. Please process the following input or context: {{args}}. If no input is provided, proceed with the default workflow for content strategy planning."
