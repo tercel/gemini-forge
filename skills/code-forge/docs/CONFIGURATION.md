@@ -43,17 +43,11 @@ project/
     "output": "planning/"         // Output: implementation plans
   },
 
-  "naming": {
-    "feature_prefix": "",          // Feature directory prefix
-    "task_prefix": "",             // Task file prefix
-    "use_date": false              // Whether to use date prefix
-  },
-
   "git": {
     "auto_commit": false,          // Auto-commit after file generation
     "commit_state_file": true,     // Whether to commit state.json
     "gitignore_patterns": [        // Auto-add to .gitignore
-      "**/.code-forge-temp/"
+      "**/.code-forge/"
     ]
   },
 
@@ -219,19 +213,19 @@ When running `/code-forge:plan`, code-forge will:
 3. Inject summaries as context into plan generation sub-agents
 4. Generated `plan.md` and `tasks/*.md` will reflect existing architecture and conventions
 
-**Note:** Reference docs are only used at plan time. The generated plan and task files already contain baked-in context — downstream skills (`impl`, `fixbug`, `review`) do not re-read reference docs.
+**Note:** Reference docs are only used at plan time. The generated plan and task files already contain baked-in context — downstream skills (`impl`, `fix`, `review`) do not re-read reference docs.
 
 ## Configuration Field Details
 
 ### _tool (Read-Only)
 
-The `_tool` section identifies the Code Forge skill itself. It helps new team members understand what `.code-forge.json` is and where to install the tool.
+The `_tool` section identifies the Code Forge plugin itself. It helps new team members understand what `.code-forge.json` is and where to install the tool.
 
 | Field | Type | Value | Description |
 |-------|------|-------|-------------|
-| `name` | string | `"code-forge"` | Skill name |
+| `name` | string | `"code-forge"` | Plugin name |
 | `description` | string | `"Transform documentation..."` | What this tool does |
-| `url` | string | `"https://github.com/tercel/code-forge"` | Skill repository URL for installation |
+| `url` | string | `"https://github.com/tercel/code-forge"` | Plugin repository URL for installation |
 
 **Why include this?**
 - A new team member sees `.code-forge.json` in the project and immediately knows:
@@ -285,17 +279,7 @@ The `_tool` section identifies the Code Forge skill itself. It helps new team me
 }
 // Result:
 // → user-auth/
-// → tasks/01-setup.md
-
-// Use date prefix
-{
-  "naming": {
-    "use_date": true
-  }
-}
-// Result:
-// → 2025-02-13-user-auth/
-// → tasks/2025-02-13-01-setup.md
+// → tasks/setup.md
 
 // Custom prefix
 {
@@ -306,8 +290,10 @@ The `_tool` section identifies the Code Forge skill itself. It helps new team me
 }
 // Result:
 // → feat-user-auth/
-// → tasks/task-01-setup.md
+// → tasks/task-setup.md
 ```
+
+> **Note:** The `naming` section is reserved for future use. Currently, task files always use descriptive names without numeric prefixes (e.g., `setup.md`, not `01-setup.md`). Execution order is controlled by `overview.md` and `state.json`.
 
 ### git
 
@@ -377,7 +363,7 @@ The `_tool` section identifies the Code Forge skill itself. It helps new team me
 - Each matched file is summarized by a parallel sub-agent (~300-500 bytes each)
 - Summaries are injected as context into plan generation sub-agents (Steps 2, 6, 7)
 - Generated plans and task files contain baked-in reference context
-- Downstream skills (impl, fixbug, review) work from these files — no re-reading needed
+- Downstream skills (impl, fix, review) work from these files — no re-reading needed
 
 **Auto-exclusions:**
 - The output directory (`{base}/{output}/**`) is always excluded to prevent circular references
@@ -529,7 +515,7 @@ EOF
   // ❌ Don't use directories with tool names
   "directories": {
     "base": ".forge/",     // Tool traces
-    "base": "gemini-dev/"  // Tool traces
+    "base": "claude-dev/"  // Tool traces
   },
 
   // ❌ Don't use existing directories
@@ -575,13 +561,16 @@ cp /path/to/code-forge/templates/.code-forge.json .
 # Team project: enable git.auto_commit and gitignore patterns
 ```
 
-## Ignore Configuration File
+## Temporary Mode
 
-If project has `.code-forge.json` but you want to temporarily ignore it:
+If you don't want plan files in the project, use `--tmp`:
 
 ```bash
-/code-forge:plan @xxx.md --ignore-config
+/code-forge:plan --tmp "Add user export feature"
+/code-forge:plan --tmp @docs/features/user-auth.md
 ```
+
+Plan files are written to `.code-forge/tmp/` (auto-gitignored). `/impl` and `/status` automatically find plans there. `/finish` cleans up after merge.
 
 ## Example: Avoid docs Conflict
 

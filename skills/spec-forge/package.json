@@ -1,6 +1,6 @@
 {
   "name": "spec-forge-gemini",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Professional product and software requirements engineering — from PRDs and SRS to technical design, test plans, and feature decomposition.",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,20 @@
     "uninstall:user": "gemini-forge uninstall user",
     "uninstall:workspace": "gemini-forge uninstall workspace"
   },
-  "keywords": [],
+  "keywords": [
+    "idea",
+    "analyze",
+    "audit",
+    "feature-specs",
+    "knowledge-mapping",
+    "document-analysis",
+    "prd",
+    "srs",
+    "tech-design",
+    "test-cases",
+    "decomposition",
+    "specification"
+  ],
   "author": "",
   "license": "ISC"
 }

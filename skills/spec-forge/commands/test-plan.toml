@@ -1,3 +1,0 @@
-description = "Use when writing a test plan, test cases, test strategy, or QA document — follows IEEE 829 and ISTQB standards"
-argument-hint = "<feature name>"
-prompt = "Activating the spec-forge:test-plan for: {{args}}. If no input provided, start new Test Plan workflow."

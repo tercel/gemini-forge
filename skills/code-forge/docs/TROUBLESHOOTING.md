@@ -558,7 +558,7 @@ If the problem cannot be resolved, provide when creating an issue:
 
 ## Environment Information
 - OS: macOS / Linux / Windows
-- Gemini CLI Version:
+- Claude Code Version:
 - Code Forge Version:
 
 ## Configuration File

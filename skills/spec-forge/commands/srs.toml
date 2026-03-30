@@ -1,3 +1,0 @@
-description = "Use when writing an SRS, requirements spec, or functional/non-functional requirements — follows IEEE 830 with traceability"
-argument-hint = "<feature name>"
-prompt = "Activating the spec-forge:srs for: {{args}}. If no input provided, start new SRS workflow."

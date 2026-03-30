@@ -171,6 +171,7 @@ function install_all() {
         local target_cmd_dir="$cmd_base/$PROJECT_NAME"
         mkdir -p "$target_cmd_dir"
         cp "$target_dir/commands"/*.toml "$target_cmd_dir/" 2>/dev/null
+        cp "$target_dir/commands"/*.md "$target_cmd_dir/" 2>/dev/null
         echo "🚀 Syncing commands to $target_cmd_dir"
     fi
     echo "✨ Done!"

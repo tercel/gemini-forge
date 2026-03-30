@@ -1,3 +1,0 @@
-description = "Use when writing a PRD, product spec, or product requirements — follows Google/Amazon/Stripe methodologies"
-argument-hint = "<feature name>"
-prompt = "Activating the spec-forge:prd for: {{args}}. If no input provided, start new PRD workflow."

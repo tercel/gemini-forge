@@ -1,3 +1,0 @@
-description = "Use when writing a tech design, architecture doc, RFC, or design document — follows Google Design Doc format"
-argument-hint = "<feature name>"
-prompt = "Activating the spec-forge:tech-design for: {{args}}. If no input provided, start new Technical Design workflow."
