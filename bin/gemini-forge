@@ -16,6 +16,7 @@ Commands:
   build [path]          Build .skill files for the specified project. (Alias: package)
   install [path] [scope] Install packaged skills and sync commands.
   deploy [path] [scope]  Shortcut for 'build' followed by 'install'.
+  redeploy [path] [scope] Uninstall followed by 'deploy'. (Alias: upgrade)
   uninstall [path] [scope] Uninstall resources associated with the project.
   version               Show the current version of gemini-forge.
 
@@ -222,7 +223,7 @@ function normalize_args() {
         local scope="$2"
         local extra="${3:-}"
         case "$cmd" in
-            install|uninstall|deploy)
+            install|uninstall|deploy|redeploy|upgrade)
                 echo "$cmd" "." "$scope"
                 return
                 ;;
@@ -240,6 +241,7 @@ case "$1" in
     install) install_all "$2" "$3" ;;
     uninstall) uninstall_all "$2" "$3" ;;
     deploy) package_all "$2" && install_all "$2" "$3" ;;
+    redeploy|upgrade) uninstall_all "$2" "$3" && package_all "$2" && install_all "$2" "$3" ;;
     check) is_gemini_skill "${2:-"."}" && echo "✅ Valid" || (echo "❌ Invalid" && exit 1) ;;
     version|-v|--version) show_version ;;
     -h|--help|help) show_help ;;
