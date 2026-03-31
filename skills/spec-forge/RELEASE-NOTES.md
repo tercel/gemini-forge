@@ -125,7 +125,7 @@
 
 ### Breaking Changes
 
-- **Renamed from `doc-lifecycle` to `spec-forge`**. Update your plugin installation accordingly.
+- **Renamed from `doc-lifecycle` to `spec-forge`**. Update your skill installation accordingly.
 
 ### New Features
 
@@ -147,7 +147,7 @@
 
 ### Overview
 
-spec-forge (originally doc-lifecycle) is a Claude Code plugin that generates professional-grade software specifications at every stage of the development lifecycle, based on industry best practices from Google, Amazon, Stripe, IEEE, and ISTQB standards.
+spec-forge (originally doc-lifecycle) is a Gemini CLI skill that generates professional-grade software specifications at every stage of the development lifecycle, based on industry best practices from Google, Amazon, Stripe, IEEE, and ISTQB standards.
 
 ### Core Features
 
@@ -181,7 +181,7 @@ spec-forge (originally doc-lifecycle) is a Claude Code plugin that generates pro
 - Security, performance, observability, and deployment design
 - Quality checklist validation
 
-#### `/spec-forge:test-plan` — Test Plan & Test Cases Generation
+#### `/spec-forge:test-cases` — Test Cases Generation
 - IEEE 829 compliant test documentation
 - Real database testing policy: NO mocks for DB operations
 - Test case format (TC-MODULE-NNN) with exact DB state preconditions
@@ -195,7 +195,7 @@ spec-forge (originally doc-lifecycle) is a Claude Code plugin that generates pro
 
 Full bidirectional traceability across all document types:
 ```
-PRD (PRD-ID) → SRS (FR/NFR-ID) → Tech Design (Component/API) → Test Plan (TC-ID) → Feature Spec (code-forge input)
+PRD (PRD-ID) → SRS (FR/NFR-ID) → Tech Design (Component/API) → Test Cases (TC-ID) → Feature Spec (code-forge input)
 ```
 
 ### Standards Referenced

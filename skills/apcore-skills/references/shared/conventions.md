@@ -1,3 +1,23 @@
+### Apcore Ecosystem: The Iron Law
+
+**EVERY PROJECT MUST IMPLEMENT THE FULL API CONTRACT.** No partial implementations — if you ship it, it must cover all exported symbols from the reference implementation.
+
+#### Anti-Rationalization Table
+
+| Thought | Reality |
+|---------|---------|
+| "I'll start with just the core classes" | Start with a complete project skeleton. Feature implementation order is code-forge's job. |
+| "Copy the Python structure exactly" | Use idiomatic target-language patterns. Same concepts, different structure. |
+| "Tests can come later" | TDD is mandatory. Test infrastructure is set up in scaffolding. |
+| "I'll figure out the naming as I go" | Naming is defined by conventions.md. Apply language rules from day one. |
+| "Examples can be added after the API works" | Examples are ported from the reference implementation during scaffolding. Users need runnable code from day one. |
+
+#### Quality Standards
+
+- **Core Consistency**: API signatures and internal logic must be functionally identical across all SDKs.
+- **Language Idioms**: While logic is consistent, implementation must follow each language's native idioms.
+- **Zero Drift**: Documentation must accurately reflect the implementation in every supported repository.
+
 ### Apcore Ecosystem Conventions
 
 Canonical conventions that all apcore repositories must follow. Used by audit, sync, and scaffolding skills.

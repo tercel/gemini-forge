@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
-# test-prd.sh — Tests for the /prd skill
+# test-prd.sh — Static and headless validation for /prd
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/test-helpers.sh"
 
 echo "Testing /prd skill..."
-
-# ── Static Tests (no claude CLI needed) ─────────────────────────────
-
 echo ""
 echo "Static validation:"
 
@@ -17,40 +14,40 @@ assert_file_exists "$PROJECT_DIR/commands/prd.md" \
   "prd.md command file exists"
 
 # Verify skill files exist
-assert_file_exists "$PROJECT_DIR/skills/prd-generation/SKILL.md" \
+assert_file_exists "$PROJECT_DIR/references/prd/SKILL.md" \
   "PRD SKILL.md exists"
-assert_file_exists "$PROJECT_DIR/skills/prd-generation/references/template.md" \
+assert_file_exists "$PROJECT_DIR/references/prd/template.md" \
   "PRD template exists"
-assert_file_exists "$PROJECT_DIR/skills/prd-generation/references/checklist.md" \
+assert_file_exists "$PROJECT_DIR/references/prd/checklist.md" \
   "PRD checklist exists"
+assert_file_exists "$PROJECT_DIR/references/prd/writing-guidelines.md" \
+  "PRD writing-guidelines.md exists"
+assert_file_exists "$PROJECT_DIR/references/prd/standards.md" \
+  "PRD standards.md exists"
 
-# Verify command file contains key elements
-assert_file_contains "$PROJECT_DIR/commands/prd.md" "market" \
-  "prd.md mentions market analysis"
-assert_file_contains "$PROJECT_DIR/commands/prd.md" "feasibility" \
-  "prd.md mentions feasibility assessment"
-assert_file_contains "$PROJECT_DIR/commands/prd.md" "anti-pseudo-requirement" \
-  "prd.md mentions anti-pseudo-requirement principle"
-assert_file_contains "$PROJECT_DIR/commands/prd.md" "Anti-Shortcut" \
-  "prd.md contains Anti-Shortcut Rules"
-assert_file_contains "$PROJECT_DIR/commands/prd.md" "Next Steps" \
-  "prd.md contains Next Steps section"
+# Verify content in references
+assert_file_contains "$PROJECT_DIR/references/prd/writing-guidelines.md" "market" \
+  "prd guidelines mention market analysis"
+assert_file_contains "$PROJECT_DIR/references/prd/writing-guidelines.md" "feasibility" \
+  "prd guidelines mention feasibility assessment"
+assert_file_contains "$PROJECT_DIR/references/prd/writing-guidelines.md" "anti-pseudo-requirement" \
+  "prd guidelines mention anti-pseudo-requirement principle"
+assert_file_contains "$PROJECT_DIR/references/prd/standards.md" "Anti-Shortcut" \
+  "prd standards contain Anti-Shortcut Rules"
 
-# ── Headless Tests (require claude CLI) ─────────────────────────────
+# ── Headless Tests (require gemini CLI) ─────────────────────────────
 
 echo ""
 echo "Headless tests:"
 
-if check_claude_available; then
-  run_claude "Load the /prd skill and describe what it does. Do not execute it, just summarize its purpose and key sections." || true
-
-  assert_contains "$CLAUDE_OUTPUT" "PRD" \
-    "claude recognizes PRD skill"
-  assert_contains "$CLAUDE_OUTPUT" "product" \
-    "claude mentions product requirements"
+if check_gemini_available; then
+  run_gemini "Load the /prd skill and describe what it does. Do not execute it, just summarize its purpose and key sections." || true
+  assert_contains "$GEMINI_OUTPUT" "Product Requirements Document" \
+    "gemini recognizes prd skill"
+  assert_contains "$GEMINI_OUTPUT" "Five-Step Workflow" \
+    "gemini mentions prd workflow"
 else
-  skip_test "claude CLI not available — skipping headless tests"
+  TESTS_SKIPPED=$((TESTS_SKIPPED+2))
 fi
 
-# ── Summary ─────────────────────────────────────────────────────────
 print_summary

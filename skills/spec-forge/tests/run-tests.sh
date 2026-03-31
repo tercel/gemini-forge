@@ -4,7 +4,7 @@
 #   bash tests/run-tests.sh                  # Run all tests
 #   bash tests/run-tests.sh --verbose        # Verbose output
 #   bash tests/run-tests.sh --test prd       # Run only test-prd.sh
-#   bash tests/run-tests.sh --timeout 60     # Set timeout per claude call (seconds)
+#   bash tests/run-tests.sh --timeout 60     # Set timeout per gemini call (seconds)
 
 set -euo pipefail
 
@@ -45,7 +45,7 @@ while [[ $# -gt 0 ]]; do
       echo "Options:"
       echo "  --verbose, -v          Verbose output"
       echo "  --test, -t <name>      Run only the specified test (e.g., 'prd' for test-prd.sh)"
-      echo "  --timeout <seconds>    Timeout per claude call (default: 30)"
+      echo "  --timeout <seconds>    Timeout per gemini call (default: 30)"
       echo "  --help, -h             Show this help"
       exit 0
       ;;
@@ -92,7 +92,7 @@ if [ ${#TEST_FILES[@]} -eq 0 ]; then
 fi
 
 echo -e "${BLUE}Found ${#TEST_FILES[@]} test suite(s)${NC}"
-echo -e "${BLUE}Timeout: ${TEST_TIMEOUT}s per claude call${NC}"
+echo -e "${BLUE}Timeout: ${TEST_TIMEOUT}s per gemini call${NC}"
 echo ""
 
 for test_file in "${TEST_FILES[@]}"; do

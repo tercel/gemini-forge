@@ -5,7 +5,7 @@ Follow these steps exactly to generate the PRD document.
 ## Step 1: Generate Document
 
 Load and follow the PRD template from the skill reference file at:
-`skills/prd-generation/references/template.md`
+`references/prd/template.md`
 
 Generate the complete PRD following the template structure. Key requirements:
 - Use clear, concise language
@@ -21,7 +21,7 @@ Generate the complete PRD following the template structure. Key requirements:
 ## Step 2: Quality Check
 
 Load the quality checklist from:
-`skills/prd-generation/references/checklist.md`
+`references/prd/checklist.md`
 
 Run through every item in the checklist. For any failed check, revise the document before finalizing.
 

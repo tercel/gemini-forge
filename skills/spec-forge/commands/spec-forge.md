@@ -1,5 +1,5 @@
 ---
-allowed-tools: read_file, glob, grep_search, write_file, replace, ask_user, run_shell_command, codebase_investigator, generalist
+allowed-tools: read_file, glob, grep_search, write_file, replace, ask_user, run_shell_command, web_search, codebase_investigator, generalist
 description: "Use when generating software specifications — full chain (Idea→Decompose→Tech Design + Feature Specs → Review)"
 argument-hint: "[idea|decompose|prd|srs|tech-design|test-cases|audit|analyze] <name or path>"
 ---

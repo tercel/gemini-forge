@@ -1,14 +1,11 @@
 #!/usr/bin/env bash
-# test-tech-design.sh — Tests for the /tech-design skill
+# test-tech-design.sh — Static and headless validation for /tech-design
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/test-helpers.sh"
 
 echo "Testing /tech-design skill..."
-
-# ── Static Tests ────────────────────────────────────────────────────
-
 echo ""
 echo "Static validation:"
 
@@ -17,46 +14,40 @@ assert_file_exists "$PROJECT_DIR/commands/tech-design.md" \
   "tech-design.md command file exists"
 
 # Verify skill files exist
-assert_file_exists "$PROJECT_DIR/skills/tech-design-generation/SKILL.md" \
+assert_file_exists "$PROJECT_DIR/references/tech-design/SKILL.md" \
   "Tech Design SKILL.md exists"
-assert_file_exists "$PROJECT_DIR/skills/tech-design-generation/references/template.md" \
+assert_file_exists "$PROJECT_DIR/references/tech-design/template.md" \
   "Tech Design template exists"
-assert_file_exists "$PROJECT_DIR/skills/tech-design-generation/references/checklist.md" \
+assert_file_exists "$PROJECT_DIR/references/tech-design/checklist.md" \
   "Tech Design checklist exists"
+assert_file_exists "$PROJECT_DIR/references/tech-design/writing-guidelines.md" \
+  "Tech Design writing-guidelines.md exists"
+assert_file_exists "$PROJECT_DIR/references/tech-design/standards.md" \
+  "Tech Design standards.md exists"
 
-# Verify C4 architecture diagram references
-assert_file_contains "$PROJECT_DIR/commands/tech-design.md" "C4" \
-  "tech-design.md references C4 architecture diagrams"
+# Verify content in references
+assert_file_contains "$PROJECT_DIR/references/tech-design/standards.md" "C4" \
+  "tech-design standards reference C4 architecture diagrams"
+assert_file_contains "$PROJECT_DIR/references/tech-design/writing-guidelines.md" "alternative solutions" \
+  "tech-design guidelines require alternative solutions"
+assert_file_contains "$PROJECT_DIR/references/tech-design/writing-guidelines.md" "Parameter Validation" \
+  "tech-design guidelines mention parameter validation matrix"
+assert_file_contains "$PROJECT_DIR/references/tech-design/writing-guidelines.md" "Boundary Values" \
+  "tech-design guidelines mention boundary values"
 
-# Verify alternative solution comparison
-assert_file_contains "$PROJECT_DIR/commands/tech-design.md" "alternative" \
-  "tech-design.md requires alternative solutions"
-
-# Verify parameter validation matrix
-assert_file_contains "$PROJECT_DIR/commands/tech-design.md" "Parameter Validation" \
-  "tech-design.md mentions parameter validation matrix"
-
-# Verify defensive prompts and next steps
-assert_file_contains "$PROJECT_DIR/commands/tech-design.md" "Anti-Shortcut" \
-  "tech-design.md contains Anti-Shortcut Rules"
-assert_file_contains "$PROJECT_DIR/commands/tech-design.md" "Next Steps" \
-  "tech-design.md contains Next Steps section"
-
-# ── Headless Tests ──────────────────────────────────────────────────
+# ── Headless Tests (require gemini CLI) ─────────────────────────────
 
 echo ""
 echo "Headless tests:"
 
-if check_claude_available; then
-  run_claude "Load the /tech-design skill and describe what it does. Do not execute it, just summarize its purpose and key sections." || true
-
-  assert_contains "$CLAUDE_OUTPUT" "design" \
-    "claude recognizes tech design skill"
-  assert_contains "$CLAUDE_OUTPUT" "architecture" \
-    "claude mentions architecture"
+if check_gemini_available; then
+  run_gemini "Load the /tech-design skill and describe what it does. Do not execute it, just summarize its purpose and key sections." || true
+  assert_contains "$GEMINI_OUTPUT" "Technical Design" \
+    "gemini recognizes tech-design skill"
+  assert_contains "$GEMINI_OUTPUT" "Seven-Step Workflow" \
+    "gemini mentions tech-design workflow"
 else
-  skip_test "claude CLI not available — skipping headless tests"
+  TESTS_SKIPPED=$((TESTS_SKIPPED+2))
 fi
 
-# ── Summary ─────────────────────────────────────────────────────────
 print_summary

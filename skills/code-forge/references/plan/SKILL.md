@@ -328,27 +328,7 @@ Spawn an `Agent` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Analyze feature document"`
 
-**Sub-agent prompt must include:**
-- The input document file path (so the sub-agent reads it, NOT the main context)
-- Instruction to return ONLY a structured summary
-- If `reference_summaries` is non-empty (from Step 1), include a `## Reference Context` section:
-  ```
-  ## Reference Context
-
-  The following project documents provide architectural context.
-  Use these to align your analysis with existing project decisions and patterns.
-
-  {reference_summaries — all summaries concatenated, separated by blank lines}
-  ```
-
-**Sub-agent must analyze and return:**
-1. **Feature Name** — extracted from the source **filename** (kebab-case, without `.md` extension). Always use the filename, never the document title. Example: source file `security.md` → feature name `security`, even if the document title is "Security Manager".
-2. **Technical Requirements** — tech stack, frameworks, languages mentioned
-3. **Functional Scope** — 2-3 sentence summary of what needs to be implemented
-4. **Constraints** — performance, security, compatibility requirements
-5. **Testing Requirements** — testing strategy mentioned, or "not specified"
-6. **Key Components** — major modules/components to build (bulleted list)
-7. **Estimated Complexity** — low/medium/high with brief rationale
+@./prompts/summarize-feature.md
 
 **Main context retains:** Only the structured summary returned by the sub-agent (~1-2KB). The full document content stays in the sub-agent's context and is discarded.
 
@@ -645,6 +625,16 @@ Optionally synchronize tasks to Claude Code's Task system:
 
 - Writing a single document instead of the multi-file structure (`overview.md` + `plan.md` + `tasks/*.md` + `state.json`)
 - Using `docs/plan/`, `docs/plans/`, or `docs/planning/` instead of `{output_dir}`
+- Putting task content inside `plan.md` instead of separate `tasks/{name}.md` files
+- Using numeric prefixes on task files (`01-setup.md` instead of `setup.md`)
+- Using numeric prefixes on feature directories (`FE-01-core-dispatcher` instead of `core-dispatcher`)
+- Generating flat files instead of per-feature subdirectories with multi-file structure
+- Treating a path-like input without `@` as a prompt instead of asking the user (Step 2.0 guard)
+- Skipping `state.json` — downstream skills (impl, status, fix, finish) cannot operate without it
+- Skipping project-level `overview.md` (Step 11)
+- Running Steps 4, 7, 8 inline instead of delegating to sub-agents via `Agent` tool
+- Proceeding to Step 13 without running Step 12 verification
+put_dir}`
 - Putting task content inside `plan.md` instead of separate `tasks/{name}.md` files
 - Using numeric prefixes on task files (`01-setup.md` instead of `setup.md`)
 - Using numeric prefixes on feature directories (`FE-01-core-dispatcher` instead of `core-dispatcher`)

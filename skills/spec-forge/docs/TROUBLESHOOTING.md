@@ -17,7 +17,7 @@
 **Symptoms**: The sub-agent starts but returns an error or empty result.
 **Solutions**:
 1. **Check context**: Did you provide enough information in the Step 2 clarification questions?
-2. **Check templates**: Ensure the template files in `skills/*/references/template.md` exist and are readable.
+2. **Check templates**: Ensure the template files in `references/*/template.md` exist and are readable.
 3. **Task length**: If the feature is extremely large, the sub-agent might hit a token limit. Try decomposing the project first with `/spec-forge:decompose`.
 
 ### Q3: Upstream document not detected

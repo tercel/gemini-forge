@@ -17,45 +17,18 @@ You are a Senior Software Architect & Product Strategist. Your mission is to gui
 
 ## Commands
 
-### `/spec-forge [name]`
-**Description**: Auto-Chain Pipeline — automatically runs Idea → Decompose → Tech Design + Feature Specs → Review.
-**Procedure**: @./references/chain.md
-
-### `/spec-forge:idea <name>`
-**Description**: Idea validation and brainstorming skill.
-**Procedure**: @./references/idea/SKILL.md
-
-### `/spec-forge:decompose <name>`
-**Description**: Project decomposition skill — splits projects into sub-features.
-**Procedure**: @./references/decompose/SKILL.md
-
-### `/spec-forge:tech-design <name>`
-**Description**: Technical Design + Feature Spec generation.
-**Procedure**: @./references/tech-design/SKILL.md
-
-### `/spec-forge:prd <name>`
-**Description**: Product Requirements Document (PRD) generation.
-**Procedure**: @./references/prd/SKILL.md
-
-### `/spec-forge:srs <name>`
-**Description**: Software Requirements Specification (SRS) generation.
-**Procedure**: @./references/srs/SKILL.md
-
-### `/spec-forge:test-cases <name>`
-**Description**: Test Case & coverage matrix generation.
-**Procedure**: @./references/test-cases/SKILL.md
-
-### `/spec-forge:review <name>`
-**Description**: Review and auto-fix generated specifications for quality.
-**Procedure**: @./references/review/SKILL.md
-
-### `/spec-forge:audit [path]`
-**Description**: Audit existing docs for quality, completeness, and code alignment.
-**Procedure**: @./references/audit/SKILL.md
-
-### `/spec-forge:analyze [path]`
-**Description**: Analyze document collections (themes, conflicts, gaps).
-**Procedure**: @./references/analyze/SKILL.md
+| Command | Description | Procedure |
+|---------|-------------|-----------|
+| `/spec-forge [name]` | Auto-Chain Pipeline (Idea → Decompose → Tech Design + Review) | @./references/chain.md |
+| `/spec-forge:idea <name>` | Interactive idea validation & brainstorming | @./references/idea/SKILL.md |
+| `/spec-forge:decompose <name>` | Project decomposition into sub-features | @./references/decompose/SKILL.md |
+| `/spec-forge:tech-design <name>` | Technical Design + Feature Spec generation | @./references/tech-design/SKILL.md |
+| `/spec-forge:prd <name>` | Product Requirements Document (PRD) generation | @./references/prd/SKILL.md |
+| `/spec-forge:srs <name>` | Software Requirements Specification (SRS) generation | @./references/srs/SKILL.md |
+| `/spec-forge:test-cases <name>` | Test Case & coverage matrix generation | @./references/test-cases/SKILL.md |
+| `/spec-forge:review <name>` | Quality audit & auto-fix for specifications | @./references/review/SKILL.md |
+| `/spec-forge:audit [path]` | Audit existing docs for code alignment & quality | @./references/audit/SKILL.md |
+| `/spec-forge:analyze [path]` | Analyze doc collections (themes, gaps, conflicts) | @./references/analyze/SKILL.md |
 
 ## Methodology & Frameworks
 

@@ -5,7 +5,7 @@ Follow these steps exactly to generate the SRS document.
 ## Step 1: Generate Document
 
 Load and follow the SRS template from the skill reference file at:
-`skills/srs-generation/references/template.md`
+`references/srs/template.md`
 
 Generate the complete SRS following the template structure. Key requirements:
 - Functional requirement IDs: FR-<MODULE>-<NNN> (e.g., FR-AUTH-001)
@@ -30,7 +30,7 @@ Generate the complete SRS following the template structure. Key requirements:
 ## Step 3: Quality Check
 
 Load the quality checklist from:
-`skills/srs-generation/references/checklist.md`
+`references/srs/checklist.md`
 
 Run through every item in the checklist. For any failed check, revise the document before finalizing.
 

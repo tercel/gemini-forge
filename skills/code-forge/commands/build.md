@@ -41,7 +41,7 @@ If the prompt contains keywords indicating test-only intent: "补测试", "写�
 
 ## Step 1: Project Analysis
 
-@../shared/project-analysis.md
+@../references/shared/project-analysis.md
 
 Execute the full Project Analysis Protocol (PA.1-PA.7). Store the Project Context Summary — it will be passed to every sub-agent.
 

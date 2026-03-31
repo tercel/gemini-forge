@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # test-helpers.sh — Common test utilities for spec-forge tests
-# Inspired by superpowers/tests/claude-code/test-helpers.sh
+# Inspired by superpowers/tests/gemini-cli/test-helpers.sh
 
 set -euo pipefail
 
@@ -22,10 +22,10 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # ── Core Functions ──────────────────────────────────────────────────
 
-# Run claude in headless mode with a prompt
-# Usage: run_claude "prompt text" [extra_args...]
-# Output is stored in $CLAUDE_OUTPUT
-run_claude() {
+# Run gemini in headless mode with a prompt
+# Usage: run_gemini "prompt text" [extra_args...]
+# Output is stored in $GEMINI_OUTPUT
+run_gemini() {
   local prompt="$1"
   shift
   local max_timeout="${TEST_TIMEOUT:-30}"
@@ -39,16 +39,16 @@ run_claude() {
   fi
 
   if [ -n "$timeout_cmd" ]; then
-    CLAUDE_OUTPUT=$($timeout_cmd "$max_timeout" claude -p "$prompt" --plugin-dir "$PROJECT_DIR/.." "$@" 2>&1) || {
+    GEMINI_OUTPUT=$($timeout_cmd "$max_timeout" gemini -p "$prompt" "$@" 2>&1) || {
       local exit_code=$?
       if [ $exit_code -eq 124 ]; then
-        echo -e "${YELLOW}TIMEOUT: claude command timed out after ${max_timeout}s${NC}" >&2
+        echo -e "${YELLOW}TIMEOUT: gemini command timed out after ${max_timeout}s${NC}" >&2
       fi
       return $exit_code
     }
   else
     # Fallback: run without timeout
-    CLAUDE_OUTPUT=$(claude -p "$prompt" --plugin-dir "$PROJECT_DIR/.." "$@" 2>&1) || {
+    GEMINI_OUTPUT=$(gemini -p "$prompt" "$@" 2>&1) || {
       return $?
     }
   fi
@@ -162,10 +162,10 @@ print_summary() {
   return 0
 }
 
-# Check if claude CLI is available
-check_claude_available() {
-  if ! command -v claude &>/dev/null; then
-    echo -e "${YELLOW}WARNING: 'claude' CLI not found. Skipping headless tests.${NC}" >&2
+# Check if gemini CLI is available
+check_gemini_available() {
+  if ! command -v gemini &>/dev/null; then
+    echo -e "${YELLOW}WARNING: 'gemini' CLI not found. Skipping headless tests.${NC}" >&2
     return 1
   fi
   return 0

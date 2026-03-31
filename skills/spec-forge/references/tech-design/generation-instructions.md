@@ -15,7 +15,7 @@ Follow these steps exactly to generate the Technical Design Document.
 ## Step 1: Generate Document
 
 Load and follow the tech design template from the skill reference file at:
-`skills/tech-design-generation/references/template.md`
+`references/tech-design/template.md`
 
 Generate the complete technical design document. Key requirements:
 - **§3.5 User Scenarios**: Write 1-3 concrete end-to-end narratives. Each scenario must name a specific persona, a Type (Human or Agent), a specific goal, numbered steps, and a measurable success condition. Do NOT write generic scenarios like "User uses the feature successfully" — they must be specific enough that a QA engineer can derive a test case. If the upstream PRD marks AI Agent as an applicable consumer (§10.1), include at least one Agent scenario with programmatic steps (API calls, not UI clicks) and machine-verifiable success conditions (deterministic schema, idempotent behavior, structured error codes). If no upstream PRD exists, explicitly consider whether agents are realistic consumers before omitting agent scenarios.
@@ -54,7 +54,7 @@ Generate the complete technical design document. Key requirements:
 ## Step 3: Quality Check
 
 Load the quality checklist from:
-`skills/tech-design-generation/references/checklist.md`
+`references/tech-design/checklist.md`
 
 Run through every item in the checklist. For any failed check, revise the document before finalizing.
 
@@ -75,7 +75,7 @@ After writing the main tech-design document, generate individual feature spec fi
 4. **Generate overview**: Create or update `docs/features/overview.md` with the feature table, dependency graph, and execution order. If the file already exists (e.g., from a prior sub-feature in a multi-split project), merge the new components into the existing table rather than overwriting.
 5. **Cross-reference**: Ensure each feature spec's SRS Refs field matches the Traceability Matrix in the main tech-design document. Ensure Depends On / Blocks fields use component slugs and form a consistent dependency graph. Verify all referenced slugs correspond to actual files in `docs/features/`.
 
-Read `skills/tech-design-generation/SKILL.md` and locate Step 7 (Feature Spec Generation) — it contains the Feature Spec Template you must use for each component file.
+Read `references/tech-design/SKILL.md` and locate Step 7 (Feature Spec Generation) — it contains the Feature Spec Template you must use for each component file.
 
 **Anti-Shortcut Rules for Feature Specs:**
 - Do NOT generate empty-shell feature specs with just section headings and no content

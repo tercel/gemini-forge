@@ -17,38 +17,32 @@ You are the Apcore Ecosystem Architect. Your mission is to maintain the integrit
 
 ## Commands
 
-### `/apcore:sdk <name>`
+### `/apcore-skills:sdk <name>`
 **Description**: SDK synchronization and management. Syncs core logic across multiple languages.
-**Procedure**: @./references/sdk/SKILL.md
+**Procedure**: Provided in `commands/sdk.md`.
 
-### `/apcore:integration <target>`
+### `/apcore-skills:integration <target>`
 **Description**: Framework integration scaffolding (Express, FastAPI, Gin, Axum, etc.).
-**Procedure**: @./references/integration/SKILL.md
+**Procedure**: Provided in `commands/integration.md`.
 
-### `/apcore:sync [repo]`
+### `/apcore-skills:sync [repo]`
 **Description**: Cross-repo documentation and state synchronization.
-**Procedure**: @./references/sync/SKILL.md
+**Procedure**: Provided in `commands/sync.md`.
 
-### `/apcore:audit [path]`
+### `/apcore-skills:audit [path]`
 **Description**: Ecosystem-wide audit for compatibility and standards.
-**Procedure**: @./references/audit/SKILL.md
+**Procedure**: Provided in `commands/audit.md`.
 
-### `/apcore:release <version>`
+### `/apcore-skills:release <version>`
 **Description**: Coordinated multi-repo release orchestration.
-**Procedure**: @./references/release/SKILL.md
+**Procedure**: Provided in `commands/release.md`.
 
-### `/apcore:tester`
+### `/apcore-skills:tester`
 **Description**: Cross-language integration testing and verification.
-**Procedure**: @./references/tester/SKILL.md
+**Procedure**: Provided in `commands/tester.md`.
 
 ## Methodology & Frameworks
 
-- **Cross-Language Alignment Protocol (CLAP)**: @./references/shared/clap.md
-- **SDK Scaffolding Templates**: Found in `templates/` for each language.
-- **Audit Findings Matrix**: Severity-classified reporting.
-
-## Quality Standards
-
-- **Core Consistency**: API signatures and internal logic must be functionally identical across all SDKs.
-- **Language Idioms**: While logic is consistent, implementation must follow each language's native idioms.
-- **Zero Drift**: Documentation must accurately reflect the implementation in every supported repository.
+- **The Iron Law & Quality Standards**: See `references/shared/conventions.md` for authoritative ecosystem rules.
+- **Ecosystem Discovery**: See `references/shared/ecosystem.md` for how the skill maps the workspace.
+- **Audit findings**: See `commands/audit.md` for severity-classified reporting details.

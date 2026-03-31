@@ -17,6 +17,10 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 
 ## Commands
 
+### `/code-forge:build [target]`
+**Description**: End-to-end implementation pipeline (test cases → plan → impl → review → verify).
+**Procedure**: @./commands/build.md
+
 ### `/code-forge:plan [target]`
 **Description**: Generate implementation plan from docs or requirements.
 **Procedure**: @./references/plan/SKILL.md
@@ -64,6 +68,10 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 ### `/code-forge:parallel`
 **Description**: Dispatch parallel agents for independent problems.
 **Procedure**: @./references/parallel/SKILL.md
+
+### `/code-forge:forge`
+**Description**: Legacy entry point for command discovery and usage guide.
+**Procedure**: @./commands/forge.md
 
 ## Methodology & Frameworks
 

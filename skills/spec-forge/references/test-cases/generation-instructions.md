@@ -5,7 +5,7 @@ Follow these steps exactly to generate the Test Plan document.
 ## Step 1: Generate Document
 
 Load and follow the test plan template from the skill reference file at:
-`skills/test-plan-generation/references/template.md`
+`references/test-cases/template.md`
 
 Generate the complete test plan document. The PRIMARY PURPOSE is to guide engineers in writing implementation-ready test cases. Key requirements:
 
@@ -43,7 +43,7 @@ Generate the complete test plan document. The PRIMARY PURPOSE is to guide engine
 ## Step 3: Quality Check
 
 Load the quality checklist from:
-`skills/test-plan-generation/references/checklist.md`
+`references/test-cases/checklist.md`
 
 Run through every item in the checklist. For any failed check, revise the document before finalizing.
 
@@ -51,7 +51,7 @@ Run through every item in the checklist. For any failed check, revise the docume
 
 1. Sanitize the feature name to create a filename slug (lowercase, hyphens, no special chars)
 2. Create the `docs/` directory if it doesn't exist
-3. Write the final document to `docs/<feature-name>/test-plan.md`
+3. Write the final document to `docs/<feature-name>/test-cases.md`
 4. Confirm the file path and provide a brief summary
 
 ## Important Guidelines

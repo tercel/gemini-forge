@@ -40,10 +40,10 @@ project/
   },
 
   "templates": {
-    "prd": "skills/prd-generation/references/template.md",
-    "srs": "skills/srs-generation/references/template.md",
-    "tech_design": "skills/tech-design-generation/references/template.md",
-    "test_plan": "skills/test-plan-generation/references/template.md"
+    "prd": "references/prd/template.md",
+    "srs": "references/srs/template.md",
+    "tech_design": "references/tech-design/template.md",
+    "test_cases": "references/test-cases/template.md"
   },
 
   "git": {
@@ -87,3 +87,4 @@ Allows overriding the default templates used for document generation. Useful for
 
 ---
 *Created by [tercel](https://github.com/tercel). Optimized for Gemini CLI.*
+l](https://github.com/tercel). Optimized for Gemini CLI.*

@@ -61,81 +61,14 @@ Using the answers from Step 2 and the context from Step 1, decide which sections
 
 ### Step 4 -- Content Generation
 
-Write the PRD by filling in each section of the template. Follow the writing guidelines described below. Generate all Mermaid diagrams inline. Assign requirement IDs, priorities, and success metrics as you go.
+Write the PRD by filling in each section of the template. Follow the writing guidelines and standards defined in the reference files below. Generate all Mermaid diagrams inline. Assign requirement IDs, priorities, and success metrics as you go.
+
+- **Writing Guidelines**: @./writing-guidelines.md
+- **Standards**: @./standards.md
 
 ### Step 5 -- Quality Check
 
 Validate the completed PRD against every item in `references/checklist.md`. Fix any issues before presenting the final document to the user. Summarize the checklist results so the user can see what passed and whether any items were intentionally skipped (with justification).
-
-## Key Sections and Writing Guidelines
-
-The PRD template contains twenty sections. The following guidelines apply when writing each one.
-
-**Document Information and Revision History.** Fill in all metadata fields. Use the current date. Set the initial version to `0.1` and the status to `Draft`. The revision history table must have at least one entry corresponding to the initial draft.
-
-**Executive Summary.** Write two to four sentences that a busy executive can read in under thirty seconds. State the problem, the proposed solution, and the expected impact. Avoid jargon.
-
-**Product Overview and Background.** Provide enough context so that a new team member can understand why this initiative exists. Reference prior PRDs or design documents when they exist in the repository.
-
-**Market Research and Analysis.** This section proves that the product addresses a real market opportunity, not an imagined one. Include market sizing (TAM/SAM/SOM) with cited sources — never fabricate market data. Map the competitive landscape with at least two competitors, honestly acknowledging their strengths. Clearly articulate what differentiates this product. Include industry trends that support the initiative's timing. This section should answer: "Is there a real market for this?"
-
-**Value Proposition and Validation.** This is the anti-pseudo-requirement section. State the value proposition in one sentence. Then provide hard evidence of real demand from at least three sources: user interviews, survey data, support ticket patterns, usage analytics, beta test results, or revenue impact estimates. Include a "What happens if we don't build this?" subsection that quantifies the cost of inaction. If sufficient evidence does not exist, the PRD should honestly flag this and recommend a validation phase before committing engineering resources.
-
-**Feasibility Analysis.** Assess technical feasibility (technology readiness, infrastructure, POC status), business feasibility (revenue model, ROI, strategic alignment), and resource feasibility (team availability, skills, budget, timeline). Conclude with a clear GO / CONDITIONAL GO / NO-GO verdict. A well-reasoned NO-GO saves more resources than a poorly justified GO. Do not rubber-stamp everything as GO.
-
-**Problem Statement.** Structure this section around three lenses: the current situation, the pain points users experience, and the opportunity that addressing those pain points unlocks. Use data or user quotes when available.
-
-**Goals and Non-Goals.** Goals must be specific, measurable, and time-bound. Non-goals are equally important; they tell the team what is explicitly out of scope so energy is not wasted on tangential work.
-
-**User Personas.** Define at least two personas in table format. Each persona should have a name, role, demographic summary, core needs, and pain points. Personas must be referenced later in user stories.
-
-**User Stories and Acceptance Criteria.** Every user story follows the canonical format: "As a [user type], I want [action] so that [benefit]." Each story must have at least two acceptance criteria written as testable conditions.
-
-**Functional Requirements Overview.** List requirements in a table. Each row gets a unique ID following the naming convention described below, a short feature name, a description, a priority, a **Priority Rationale**, and a status. The Priority Rationale must answer "why this tier and not the one above or below" — referencing user impact, business consequence, or the presence/absence of an acceptable workaround. Never assign a priority without this justification; undefended priorities are flagged during the quality check.
-
-**Success Metrics.** Every metric must have a target value and a measurement method. Include the current baseline when known. Tie metrics back to the goals defined earlier.
-
-**Timeline, Milestones, and Risk Assessment.** Use Mermaid Gantt charts for the timeline. Risks go in a matrix with likelihood, impact, mitigation strategy, and an owner.
-
-**Dependencies, Open Questions, and Appendix.** Capture anything that blocks progress, anything still unresolved, and any supplementary material such as raw research data, detailed competitive analysis spreadsheets, or wireframe links.
-
-## Mermaid Diagrams
-
-Mermaid diagrams make the PRD scannable and visually informative. This skill uses three types of diagrams.
-
-**User Journey Flowcharts.** Use `graph TD` or `graph LR` to show the step-by-step path a user takes through the feature. Include decision nodes for branching logic and clearly label happy-path versus error-path flows.
-
-**Feature Architecture Diagrams.** Use `graph TD` to show the high-level component relationships: which services, APIs, data stores, and external systems interact. This is not a detailed system design; it is a conceptual map that helps non-engineers understand the moving parts.
-
-**Gantt Charts for Timelines.** Use `gantt` to lay out phases, milestones, and dependencies over time. Include sections for design, development, testing, and launch. Mark critical-path items.
-
-All Mermaid code blocks must use the ` ```mermaid ` fence so they render correctly in GitHub, GitLab, and most Markdown viewers.
-
-## PRD ID Naming Convention
-
-Every requirement, risk, and trackable item in the PRD receives a unique identifier following this pattern:
-
-```
-PRD-<MODULE>-<NNN>
-```
-
-- **PRD** is the fixed prefix indicating the document type.
-- **MODULE** is a short uppercase code (three to five characters) representing the feature area or module. Examples: `AUTH`, `PAY`, `DASH`, `NOTIF`, `ONBRD`.
-- **NNN** is a zero-padded three-digit sequence number starting at 001.
-
-Examples: `PRD-AUTH-001`, `PRD-PAY-012`, `PRD-DASH-003`.
-
-This convention ensures IDs are grep-friendly, sort-friendly, and unambiguous across multiple PRDs in the same repository.
-
-## Feature Prioritization
-
-Requirements are prioritized using a three-tier system.
-
-- **P0 -- Must Have.** The feature cannot ship without these requirements. They address core user needs or regulatory obligations. If a P0 item is cut, the launch must be reconsidered.
-- **P1 -- Should Have.** These requirements significantly improve the user experience or business outcome but are not strictly necessary for a minimum viable launch. They are the first candidates for inclusion if the timeline allows.
-- **P2 -- Nice to Have.** These are enhancements, polish items, or forward-looking capabilities that can be deferred to a subsequent release without materially affecting the launch.
-
-When assigning priorities, tie each decision back to the goals defined earlier in the document. If a requirement does not clearly support a stated goal, question whether it belongs in this PRD at all.
 
 ## Reference Files
 

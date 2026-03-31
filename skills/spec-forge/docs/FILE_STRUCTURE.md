@@ -68,7 +68,7 @@ Grounded in Google Design Doc and RFC templates.
 - Security & Performance
 - Parameter Validation Matrix
 
-### test-plan.md
+### test-cases.md
 Grounded in IEEE 829 and ISTQB.
 - Test Strategy (Pyramid)
 - Test Case Specifications (TC-XXX-NNN)
