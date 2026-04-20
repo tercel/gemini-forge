@@ -96,25 +96,39 @@ function find_packager() {
             current_dir=$(dirname "$current_dir")
             local target="$current_dir/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs"
             if [ -f "$target" ]; then echo "$target"; return; fi
+            local target2="$current_dir/bundle/builtin/skill-creator/scripts/package_skill.cjs"
+            if [ -f "$target2" ]; then echo "$target2"; return; fi
         done
     fi
     local npm_path=$(npm list -g @google/gemini-cli --parseable 2>/dev/null | head -n 1)
     if [ -n "$npm_path" ]; then
         local target="$npm_path/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs"
         if [ -f "$target" ]; then echo "$target"; return; fi
+        local target2="$npm_path/bundle/builtin/skill-creator/scripts/package_skill.cjs"
+        if [ -f "$target2" ]; then echo "$target2"; return; fi
     fi
-    local fallbacks=("/usr/local/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs" "/opt/homebrew/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs")
+    local fallbacks=(
+        "/usr/local/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs"
+        "/opt/homebrew/lib/node_modules/@google/gemini-cli/node_modules/@google/gemini-cli-core/dist/src/skills/builtin/skill-creator/scripts/package_skill.cjs"
+        "/usr/local/lib/node_modules/@google/gemini-cli/bundle/builtin/skill-creator/scripts/package_skill.cjs"
+        "/opt/homebrew/lib/node_modules/@google/gemini-cli/bundle/builtin/skill-creator/scripts/package_skill.cjs"
+    )
     for fb in "${fallbacks[@]}"; do if [ -f "$fb" ]; then echo "$fb"; return; fi; done
 }
 
-PACKAGER_PATH=$(find_packager)
-if [ -z "$PACKAGER_PATH" ] || [ ! -f "$PACKAGER_PATH" ]; then
-    echo "❌ Error: Could not find 'package_skill.cjs'."
-    exit 1
-fi
+function verify_packager() {
+    if [ -z "$PACKAGER_PATH" ]; then
+        PACKAGER_PATH=$(find_packager)
+        if [ -z "$PACKAGER_PATH" ] || [ ! -f "$PACKAGER_PATH" ]; then
+            echo "❌ Error: Could not find 'package_skill.cjs'."
+            exit 1
+        fi
+    fi
+}
 
 # Function: Cleanly package a skill directory
 function package_single_skill() {
+    verify_packager
     local src_dir="$1"
     local skill_name="$2"
     local dist_path="$3"
