@@ -23,51 +23,51 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 
 ### `/code-forge:plan [target]`
 **Description**: Generate implementation plan from docs or requirements.
-**Procedure**: @./references/plan/SKILL.md
+**Procedure**: @./commands/plan.md
 
 ### `/code-forge:impl [feature]`
 **Description**: Execute pending tasks for a feature (TDD-driven).
-**Procedure**: @./references/impl/SKILL.md
+**Procedure**: @./commands/impl.md
 
 ### `/code-forge:status [feature]`
 **Description**: View feature dashboard or progress detail.
-**Procedure**: @./references/status/SKILL.md
+**Procedure**: @./commands/status.md
 
 ### `/code-forge:review [feature]`
-**Description**: Deep code review using the 14-Dimension Quality Matrix.
-**Procedure**: @./references/review/SKILL.md
+**Description**: Deep code review using the 15-Dimension Quality Matrix.
+**Procedure**: @./commands/review.md
 
 ### `/code-forge:fix "description"`
 **Description**: Debug and fix a bug with upstream trace-back.
-**Procedure**: @./references/fix/SKILL.md
+**Procedure**: @./commands/fix.md
 
 ### `/code-forge:debug "description"`
 **Description**: Systematic root cause debugging (general-purpose).
-**Procedure**: @./references/debug/SKILL.md
+**Procedure**: @./commands/debug.md
 
 ### `/code-forge:tdd`
 **Description**: Enforce standalone Red-Green-Refactor cycle.
-**Procedure**: @./references/tdd/SKILL.md
+**Procedure**: @./commands/tdd.md
 
 ### `/code-forge:verify`
 **Description**: Verify work before claiming completion.
-**Procedure**: @./references/verify/SKILL.md
+**Procedure**: @./commands/verify.md
 
 ### `/code-forge:worktree <feature>`
 **Description**: Create isolated git worktree with project setup.
-**Procedure**: @./references/worktree/SKILL.md
+**Procedure**: @./commands/worktree.md
 
 ### `/code-forge:finish`
 **Description**: Merge, PR, or finalize a completed branch.
-**Procedure**: @./references/finish/SKILL.md
+**Procedure**: @./commands/finish.md
 
 ### `/code-forge:port @docs`
 **Description**: Port a project to a new language or framework.
-**Procedure**: @./references/port/SKILL.md
+**Procedure**: @./commands/port.md
 
 ### `/code-forge:parallel`
 **Description**: Dispatch parallel agents for independent problems.
-**Procedure**: @./references/parallel/SKILL.md
+**Procedure**: @./commands/parallel.md
 
 ### `/code-forge:forge`
 **Description**: Legacy entry point for command discovery and usage guide.
@@ -76,8 +76,8 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 ## Methodology & Frameworks
 
 - **Project Analysis Protocol (PA)**: @./references/shared/project-analysis.md
-- **Quality Review Matrix**: @./references/review/SKILL.md (14 Dimensions)
-- **Debugging Workflow**: @./references/debug/SKILL.md (4 Phases)
+- **Quality Review Matrix**: @./commands/review.md (15 Dimensions)
+- **Debugging Workflow**: @./commands/debug.md (4 Phases)
 
 ## Quality Standards
 
@@ -85,3 +85,4 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 - **D2. Security**: Input validation, secrets, and safety.
 - **D4. Code Quality**: Naming, DRY, and clean architecture.
 - **D7. Test Coverage**: Happy/sad paths and edge cases.
+- **D15. Simplification & Anti-Bloat**: Grep-verified reuse and scope control.

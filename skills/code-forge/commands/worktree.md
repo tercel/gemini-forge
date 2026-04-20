@@ -1,9 +1,152 @@
 ---
-description: "Use when starting feature work that needs workspace isolation — creates git worktree with project setup and baseline tests"
+description: "Create an isolated git worktree for feature development with automatic project setup and baseline test verification"
 argument-hint: "<feature-name>"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion]
+allowed-tools: [Read, Glob, Grep, Bash, AskUserQuestion]
 ---
 
-Invoke the code-forge:worktree skill and follow it exactly as presented to you.
+# Code Forge — Worktree
 
-The user invoked this command with: $ARGUMENTS
+## ⚡ Execution Entry Point (READ THIS FIRST)
+
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+
+If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
+
+If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual worktree setup", "回退到手动 worktree", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
+
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+
+---
+
+Create an isolated git worktree for feature development with automated project setup and safety verification.
+
+## When to Use
+
+- Starting feature work that should not affect the main workspace
+- Before running code-forge:impl to isolate implementation changes
+- When you need a clean baseline for testing or experimentation
+
+## Iron Law
+
+**NEVER create a project-local worktree without verifying it is git-ignored.** Worktree contents tracked by git will cause repository corruption.
+
+## Workflow
+
+```
+Detect Directory → Verify Safety → Create Worktree → Project Setup → Baseline Tests → Report
+```
+
+### Step 1: Detect Worktree Directory
+
+Check in order:
+1. Existing `.worktrees/` or `worktrees/` directory in project root — use if found
+2. Project CLAUDE.md for worktree preference — use without asking
+3. Ask user:
+   - **Project-local** `.worktrees/` (Recommended) — keeps worktrees near the code
+   - **Global** `~/.config/code-forge/worktrees/` — outside project, no .gitignore needed
+
+### Step 2: Verify Safety (Project-Local Only)
+
+**CRITICAL:** If using a project-local directory:
+
+```bash
+git check-ignore -q <worktree-dir>
+```
+
+- **Ignored:** Proceed
+- **NOT ignored:** Add to `.gitignore` immediately, then commit:
+  ```bash
+  echo "<worktree-dir>/" >> .gitignore
+  git add .gitignore && git commit -m "chore: add worktree directory to .gitignore"
+  ```
+
+Global directory: skip this step.
+
+### Step 3: Create Worktree
+
+```bash
+# Detect project name
+PROJECT_NAME=$(basename "$(git rev-parse --show-toplevel)")
+
+# Create worktree with new branch
+git worktree add <worktree-dir>/<feature-name> -b <feature-name>
+```
+
+Branch naming: use the feature name provided by the user, prefixed with `feat/` if not already prefixed.
+
+### Step 4: Project Setup
+
+Auto-detect and run setup in the worktree directory:
+
+| Marker | Command |
+|--------|---------|
+| `package.json` | `npm install` |
+| `package-lock.json` | `npm ci` |
+| `yarn.lock` | `yarn install` |
+| `pnpm-lock.yaml` | `pnpm install` |
+| `requirements.txt` | `pip install -r requirements.txt` |
+| `pyproject.toml` | `pip install -e .` or `poetry install` |
+| `Cargo.toml` | `cargo fetch` |
+| `go.mod` | `go mod download` |
+| `build.gradle` | `./gradlew dependencies` |
+| `pom.xml` | `mvn dependency:resolve` |
+
+If multiple markers exist, run the most specific one. If none match, skip setup.
+
+### Step 5: Baseline Tests
+
+Run the project's test command to establish a clean baseline:
+
+```bash
+# Auto-detect test command from package.json, Makefile, etc.
+# Run tests and report results
+```
+
+- **All pass:** Report green baseline, proceed
+- **Some fail:** Warn user — "Baseline has N failing tests. These are pre-existing, not caused by your changes."
+- **No test command found:** Skip, inform user
+
+### Step 6: Report
+
+```
+Worktree created:
+  Branch:    feat/<feature-name>
+  Location:  <worktree-dir>/<feature-name>
+  Setup:     npm install (completed)
+  Baseline:  42/42 tests passing
+
+Next steps (code-forge workflow):
+  /code-forge:impl <feature-name>    Execute implementation tasks
+  /code-forge:finish                  When done, merge/PR/cleanup
+
+Next steps (ad-hoc development):
+  /code-forge:tdd                    Enforce TDD discipline
+  /code-forge:finish                  When done, merge/PR/cleanup
+```
+
+## Example
+
+```
+$ /code-forge:worktree user-auth
+
+Worktree created:
+  Branch:    feat/user-auth
+  Location:  .worktrees/user-auth
+  Setup:     npm ci (completed)
+  Baseline:  42/42 tests passing
+
+Next steps:
+  /code-forge:impl user-auth    Execute implementation tasks
+  /code-forge:finish             When done, merge/PR/cleanup
+```
+
+## Cleanup
+
+To remove a stale worktree manually: `git worktree remove <path>`. List all worktrees with `git worktree list`. The `/code-forge:finish` skill handles cleanup automatically.
+
+## Common Mistakes
+
+- Creating project-local worktree without checking .gitignore
+- Skipping baseline tests — pre-existing failures mask new regressions
+- Hardcoding setup commands instead of auto-detecting
+- Proceeding when baseline tests fail without user acknowledgment

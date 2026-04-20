@@ -34,6 +34,9 @@ Display the following report directly in the terminal using markdown.
 
 **Issue Breakdown:** {blocker_count} blockers · {critical_count} critical · {warning_count} warnings · {suggestion_count} suggestions
 
+**Call-Graph Coverage:** {N} public symbols analyzed · {n_partial} partial chains · {n_suspicious} suspicious chains
+{If METHOD_CHAINS_DEFERRED non-empty:} ⚠ {N} symbols deferred — not analyzed. Reasons: {comma-separated reasons}
+
 ---
 
 ## Tier 1 — Must-Fix Before Merge
@@ -154,6 +157,42 @@ Display the following report directly in the terminal using markdown.
 
 ```markdown
 *No reference documents found — consistency check skipped.*
+```
+
+## Cross-Module Section (layered path only)
+
+Only include this section when the layered review path was used (≥ 3 affected files AND ≥ 2 module groups).
+
+```markdown
+---
+
+## Cross-Module Analysis
+
+**Modules Reviewed:** {N} module groups in parallel
+
+### Cross-Module Consistency
+
+{For each of the five CROSS_MODULE_CONSISTENCY patterns — list status and any issues, or "No issues" if consistent}
+
+| Pattern | Status | Issues |
+|---------|--------|--------|
+| Coerce/guard pattern | consistent / inconsistent | {count or —} |
+| Traceback preservation | consistent / inconsistent | {count or —} |
+| Re-export completeness | consistent / inconsistent | {count or —} |
+| Error handling convention | consistent / inconsistent | {count or —} |
+| Defensive coding depth | consistent / inconsistent | {count or —} |
+
+{List any inconsistency issues with file references and suggested fixes}
+
+### Second-Order Review (D-Series Prevention)
+
+{List each fix pattern found in the diff and whether it was applied uniformly}
+
+{If no structural parity violations:} All fix patterns applied uniformly across modules.
+
+{If violations found:}
+- **{pattern_description}** — applied in `{module_a}`, missing in `{module_b}` — `critical`
+  > {description of what to fix and where}
 ```
 
 ## Recommendations and Verdict

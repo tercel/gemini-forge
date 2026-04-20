@@ -1,9 +1,24 @@
 ---
 name: fix
-description: Debug and fix bugs with interactive upstream trace-back — diagnoses root cause level, confirms upstream document updates, and applies TDD fixes.
+description: >
+  Debug and fix bugs with interactive upstream trace-back — diagnoses root cause level,
+  confirms upstream document updates, and applies TDD fixes.
+  Supports --repos flag for parallel bug fixing across multiple repositories.
 ---
 
 # Code Forge — Fix
+
+## ⚡ Execution Entry Point (READ THIS FIRST)
+
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0.1 (Multi-Repo Detection), then Step 0.5, then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+
+If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
+
+If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual fix", "回退到手动 fix", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
+
+The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `AskUserQuestion` if a step needs disambiguation. Never an apology, never a fallback, never silence.
+
+---
 
 Systematically debug and fix bugs with interactive trace-back to upstream documents (task descriptions, plans, requirements).
 
@@ -12,6 +27,7 @@ Systematically debug and fix bugs with interactive trace-back to upstream docume
 - Encountered a bug or unexpected behavior in a feature
 - Need to diagnose whether the root cause is in code, task description, plan, or requirements
 - Want to fix the bug with TDD and keep upstream documents in sync
+- **Multi-repo:** Same bug manifests across multiple language repos (e.g., Python + TypeScript + Rust)
 
 ## Examples
 
@@ -20,17 +36,36 @@ Systematically debug and fix bugs with interactive trace-back to upstream docume
 /code-forge:fix @issues/bug-123.md              # Fix from bug report file
 /code-forge:fix --review user-auth              # Batch-fix all issues from review report
 /code-forge:fix --review                        # Auto-detect review report and fix
+/code-forge:fix "connection pool exhaustion" --repos ~/api-python ~/api-typescript ~/api-rust
 ```
 
 ## Workflow
 
 ```
-Bug Input → Context Scan → Feature Association → Root Cause Diagnosis → Trace-back Confirmation → TDD Fix → Doc Sync → Summary
+Bug Input → Context Scan → Feature Association → Root Cause → Trace-back → TDD Fix → Doc Sync → Summary
 ```
 
 ## Detailed Steps
 
 @../shared/configuration.md
+
+---
+
+### Step 0.1: Detect Multi-Repo Mode
+
+If `$ARGUMENTS` does **not** contain `--repos`, skip this step and continue below.
+
+**Note:** `--review` and `--repos` cannot be combined. If both are present, show error: "Cannot combine --review with --repos. Review reports are per-repo — run `/code-forge:fix --review` in each repo separately."
+
+If `--repos` is present (without `--review`): first, locate the skill installation directory by finding this SKILL.md file's parent (use `Glob` for `**/skills/fix/SKILL.md` if needed). Then dispatch `Agent(subagent_type="general-purpose", description="Fix --repos coordinator")` with prompt containing the **resolved absolute paths**:
+
+> Read these two files and follow them exactly:
+> 1. `{resolved_absolute_path}/skills/shared/multi-repo.md` — the protocol steps MR-1~MR-5
+> 2. `{resolved_absolute_path}/skills/fix/multi-repo-defs.md` — the fix-specific definitions
+>
+> User arguments: $ARGUMENTS
+
+Then **stop** — do not continue to Step 0.5.
 
 ---
 
@@ -294,7 +329,11 @@ Compile the fix plan:
 
 ### Step 6: TDD Fix
 
-Execute the fix following TDD methodology:
+Execute the fix following TDD methodology.
+
+**Mandatory before 6.1:** Apply the design-first discipline. Bug fixes are the most common site of patch-soup development — adding a special case to compensate for buggy logic, instead of fixing the underlying logic, is the textbook "bug-fix epicycle" anti-pattern. Read the affected subsystem fully, understand why the bug exists, and determine whether the right fix is a localized correction or a small refactor of the surrounding code. Do **not** add an `if special_case:` branch when the underlying logic is wrong — fix the logic. Public interfaces remain stable throughout. The full discipline:
+
+@../shared/design-first.md
 
 #### 6.1 Write Regression Test
 
@@ -306,7 +345,7 @@ Run the test to verify it fails.
 
 #### 6.2 Implement Fix
 
-Make the minimal code changes to fix the bug.
+Make the minimal code changes to fix the bug — but "minimal" means "minimal *correct*", not "minimal lines". A two-line patch that papers over a broken function is worse than a ten-line refactor that fixes the function. If the design-first checklist (above) revealed that the bug stems from a structural issue, fix the structure rather than adding compensating code around it. If you choose a localized patch over a refactor, briefly note in the commit message *why* the refactor was deferred so future-you can revisit.
 
 Run the regression test to verify it passes.
 
@@ -409,3 +448,4 @@ Next steps:
   /code-forge:status {feature}    View updated progress
   /code-forge:review {feature}    Review all changes
 ```
+

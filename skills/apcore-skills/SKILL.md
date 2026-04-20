@@ -17,32 +17,32 @@ You are the Apcore Ecosystem Architect. Your mission is to maintain the integrit
 
 ## Commands
 
-### `/apcore-skills:sdk <name>`
-**Description**: SDK synchronization and management. Syncs core logic across multiple languages.
-**Procedure**: Provided in `commands/sdk.md`.
+### `/apcore-skills:sdk <language>`
+**Description**: Bootstrap and implement a new language SDK for the apcore ecosystem.
+**Procedure**: @./commands/sdk.md
 
-### `/apcore-skills:integration <target>`
-**Description**: Framework integration scaffolding (Express, FastAPI, Gin, Axum, etc.).
-**Procedure**: Provided in `commands/integration.md`.
+### `/apcore-skills:integration <framework>`
+**Description**: Bootstrap a new framework integration for apcore.
+**Procedure**: @./commands/integration.md
 
-### `/apcore-skills:sync [repo]`
-**Description**: Cross-repo documentation and state synchronization.
-**Procedure**: Provided in `commands/sync.md`.
+### `/apcore-skills:sync [repos...]`
+**Description**: Cross-language API + documentation consistency verification and alignment.
+**Procedure**: @./commands/sync.md
 
-### `/apcore-skills:audit [path]`
-**Description**: Ecosystem-wide audit for compatibility and standards.
-**Procedure**: Provided in `commands/audit.md`.
+### `/apcore-skills:audit [--scope]`
+**Description**: Ecosystem-wide consistency audit for compatibility and standards.
+**Procedure**: @./commands/audit.md
 
 ### `/apcore-skills:release <version>`
-**Description**: Coordinated multi-repo release orchestration.
-**Procedure**: Provided in `commands/release.md`.
+**Description**: Coordinated multi-repo release orchestration and pipeline.
+**Procedure**: @./commands/release.md
 
-### `/apcore-skills:tester`
-**Description**: Cross-language integration testing and verification.
-**Procedure**: Provided in `commands/tester.md`.
+### `/apcore-skills:tester [<repos...>]`
+**Description**: Spec-driven test generation and cross-language behavioral verification.
+**Procedure**: @./commands/tester.md
 
 ## Methodology & Frameworks
 
 - **The Iron Law & Quality Standards**: See `references/shared/conventions.md` for authoritative ecosystem rules.
 - **Ecosystem Discovery**: See `references/shared/ecosystem.md` for how the skill maps the workspace.
-- **Audit findings**: See `commands/audit.md` for severity-classified reporting details.
+- **Audit findings**: See @./commands/audit.md for severity-classified reporting details.

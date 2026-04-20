@@ -132,26 +132,63 @@ For each exported symbol, extract:
   "generics": [],                       // generic type parameters + bounds
   "derives": ["Clone", "Debug"],        // Rust derive macros
   "feature_flag": null,                 // conditional compilation feature
-  "constructor": {
-    "params": [
-      {"name": "config", "type": "Config", "required": true, "default": null},
-      {"name": "discoverers", "type": "List[Discoverer]", "required": false, "default": "[]"}
-    ]
-  },
+  "constructors": [                     // LIST — every construction path the spec declares
+    {
+      "name": "new",                    // canonical: "new" | "with_config" | "from_env" | ...
+      "params": [
+        {"name": "config", "type": "Config", "required": true, "default": null}
+      ],
+      "return_type": "Self"
+    },
+    {
+      "name": "with_defaults",
+      "params": [],
+      "return_type": "Self"
+    }
+  ],
   "methods": [
     {
       "name": "register",
       "params": [...],
       "return_type": "None",
-      "async": false
+      "async": false,
+      "skeleton": [                     // ordered checkpoint markers found in source body
+        "validate_id_format",
+        "check_duplicate",
+        "resolve_dependencies",
+        "acquire_write_lock",
+        "insert_into_index",
+        "emit_registered_event",
+        "release_write_lock"
+      ]
     }
   ],
-  "trait_impls": [                      // Rust: which traits this struct implements
-    {"trait": "Display", "methods": ["fmt"]},
-    {"trait": "From<Config>", "methods": ["from"]}
+  "trait_impls": [                      // Idiomatic interface contracts satisfied by this class
+    {"contract": "Display", "method": "fmt"},        // Rust
+    {"contract": "Serializable", "method": "to_dict"} // Python
   ]
 }
 ```
+
+**Trait/interface satisfaction extraction (per language).**
+
+| Language | How to detect satisfaction |
+|---|---|
+| Python | Class inherits from `ABC` / `Protocol`; class implements dunder methods (`__str__`, `__eq__`, `__hash__`, `__iter__`, `__enter__`/`__exit__`); class has a `to_dict` / `from_dict` pair |
+| TypeScript | `class X implements Y`; class has `toString()`, `[Symbol.iterator]`, `[Symbol.dispose]`; class has `toJSON()` |
+| Go | Method set satisfies a known interface — grep for receiver methods like `String() string`, `Error() string`, `MarshalJSON() ([]byte, error)`, `Equal(other) bool`, `Close() error` |
+| Rust | `impl Trait for X` blocks across the entire crate (Step E.1.4); `#[derive(...)]` macros (Step E.1.7) — derives count as satisfaction |
+| Java | `class X implements Y`; presence of `equals/hashCode`, `toString`, `compareTo`, `iterator()` |
+
+**Multi-constructor extraction (per language).**
+
+| Language | What to collect |
+|---|---|
+| Python | `__init__` + every `@classmethod` returning `cls(...)` instance (e.g., `from_dict`, `from_env`, `default`) |
+| TypeScript | `constructor(...)` + every `static` method returning an instance of the same class |
+| Go | Every top-level `NewX*` function in the same package returning `*X` or `X` |
+| Rust | Every `fn` in `impl X` blocks returning `Self` or `X` (e.g., `new`, `with_config`, `from_env`, `default`) |
+| Java | All overloaded constructors + every `static` factory method returning the class type |
 
 **Step E.3: Normalize for comparison**
 
@@ -190,6 +227,160 @@ Default type mappings:
 | Callback | `Callable` | `(...) => T` | `func(...)` | `Fn(...)` / `FnMut(...)` / `FnOnce(...)` | `Function<T,R>` | `callable` |
 
 > **Note:** This table covers common single-level generics. For nested generics (e.g., `Result<Option<Vec<T>>, E>`), represent the full type structure. When structural equivalence is ambiguous, flag for manual review rather than guessing.
+
+**Default value equivalence (across languages).**
+
+When the spec declares a parameter default, each language expresses it differently. The following are considered EQUIVALENT during checklist comparison — do NOT flag as mismatch:
+
+| Concept | Python | TypeScript | Go | Rust | Java |
+|---|---|---|---|---|---|
+| Empty list | `[]` / `None` (sentinel) | `[]` / `undefined` | `nil` slice / zero-length | `Vec::new()` / `vec![]` / `Default::default()` | `Collections.emptyList()` / `null` |
+| Empty map | `{}` / `None` | `{}` / `undefined` | `nil` map / `make(map[K]V)` | `HashMap::new()` / `Default::default()` | `Collections.emptyMap()` / `null` |
+| Empty string | `""` | `""` | `""` | `String::new()` / `""` | `""` |
+| Zero number | `0` / `0.0` | `0` | `0` | `0` / `0.0` / `Default::default()` | `0` / `0L` / `0.0` |
+| False | `False` | `false` | `false` | `false` | `false` |
+| None / null | `None` | `undefined` / `null` | `nil` (zero value) | `None` (Option) | `null` / `Optional.empty()` |
+| Builder default | `cls()` no-arg | `new X()` no-arg | `&X{}` zero-value | `X::default()` / `X::new()` | `new X()` no-arg |
+| Function/callback no-op | `lambda *a, **kw: None` / `None` | `() => {}` / `undefined` | `nil` func / no-op closure | `\|\| {}` / `None` | `() -> {}` / `null` |
+| Current time | `datetime.now()` | `new Date()` | `time.Now()` | `Instant::now()` | `Instant.now()` |
+
+**Default value semantic categories.** When comparing defaults, classify each into one of: `empty_collection`, `zero`, `none`, `default_construct`, `noop_callback`, `current_time`, `literal`. Two defaults match iff they fall into the same category — exact textual form doesn't matter. For `literal`, the literal value must match (e.g., `timeout=30` in all languages).
+
+**Sentinel pattern (Python-specific):** Python often uses `def f(items=None): items = items or []` because `[]` as a default is mutable. When comparing, treat `param=None` + first-line `items = items or []` as `empty_collection` default, NOT as `none`.
+
+**Step E.4a: Algorithm Checkpoint Extraction**
+
+For each public method body, extract the ordered list of `checkpoint:NAME` markers literally present in the source. This is the input for sync's Step 4A skeleton consistency check.
+
+**Marker conventions (per language).** Sub-agents grep for these literal patterns inside the method body, in source order:
+
+| Language | Pattern (regex) | Example call site |
+|---|---|---|
+| Python | `["']checkpoint:([a-z_][a-z0-9_]*)["']` | `logger.debug("checkpoint:validate_id_format")` |
+| TypeScript | `["'\`]checkpoint:([a-z_][a-z0-9_]*)["'\`]` | `logger.debug("checkpoint:validate_id_format")` |
+| Go | `"checkpoint:([a-z_][a-z0-9_]*)"` | `slog.Debug("checkpoint:validate_id_format")` |
+| Rust | `"checkpoint:([a-z_][a-z0-9_]*)"` | `tracing::debug!("checkpoint:validate_id_format")` |
+| Java | `"checkpoint:([a-z_][a-z0-9_]*)"` | `logger.debug("checkpoint:validate_id_format")` |
+
+**Rules:**
+1. **Source-order only** — return checkpoints in the order they textually appear in the method body, NOT in any inferred runtime order. If a checkpoint appears inside an `if` branch, still record it at its textual position.
+2. **No invention** — only return checkpoints that are literally in the source. If a method has zero markers, return `[]`.
+3. **Per-method scope** — checkpoints belong to the smallest enclosing function/method. Don't bubble up to outer scopes.
+4. **Loops and branches** — if a checkpoint appears inside a loop, record it once at its textual position. If branches have different checkpoints, list them in textual order — the comparison logic will handle subsetting.
+5. **Comments and disabled code** — ignore checkpoints inside `//`, `#`, `/* */`, or string literals that are NOT inside a logger call.
+
+This pairs with Step 4A in `skills/sync/SKILL.md`.
+
+**Step E.4b: Contract Extraction (Intent Parity)**
+
+Extract the **behavioral contract** of every public method from source. This is the input for sync's Step 4B (contract tier — DEFAULT ON) and audit's D10 (Contract Parity) dimension. It captures *what* the method does — not *how* — so that cross-language divergence in logic/intent can be detected even when the Contract spec section is missing (degraded mode) or present (full parity check).
+
+See `shared/contract-spec.md` for the authoritative Contract block format and semantics. The extraction must produce a structured record for every public method, regardless of whether the spec declares a Contract — if the spec is silent, the extracted record is still useful for cross-implementation comparison (detect divergence even when spec is incomplete).
+
+For each public method, extract and return the following `contract` object:
+
+```json
+{
+  "method": "Registry.register",
+  "contract": {
+    "inputs": [
+      {
+        "name": "id",
+        "type": "str",
+        "required": true,
+        "default": null,
+        "validations": [
+          {"condition": "matches pattern ^[a-z][a-z0-9_]*$", "reject_with": "InvalidIdError"}
+        ]
+      },
+      {"name": "module", "type": "Module", "required": true, "default": null,
+       "validations": [{"condition": "isinstance(module, Module)", "reject_with": "TypeError"}]}
+    ],
+    "errors_raised": [
+      {"type": "InvalidIdError", "code": "INVALID_ID"},
+      {"type": "DuplicateError", "code": "DUPLICATE"},
+      {"type": "DependencyError", "code": "DEPENDENCY_MISSING"}
+    ],
+    "side_effects": [
+      "acquire_write_lock",
+      "validate_inputs",
+      "resolve_dependencies",
+      "insert_into_index",
+      "emit_registered_event",
+      "release_write_lock"
+    ],
+    "return_shape": {"on_success": "None", "on_failure": "raises"},
+    "properties": {
+      "async": false,
+      "thread_safe": true,
+      "pure": false,
+      "idempotent": null,
+      "reentrant": null
+    }
+  }
+}
+```
+
+**Extraction rules by field:**
+
+1. **`inputs[].validations[]`** — scan the first ~20 non-comment lines of the method body (OR every line before the first mutating call / I/O call, whichever is shorter). Collect every guard clause of the form `if <condition>: raise X` / `if <cond> { throw X }` / `if <cond> { return Err(X) }`. Record each as `{condition: human-readable, reject_with: ErrorTypeName}`. The `condition` field is the literal source text of the condition (or a concise normalization — keep it short, max 120 chars).
+
+2. **`errors_raised[]`** — grep the entire method body for error-raising patterns in the target language:
+   - Python: `raise X(...)`, `raise X` — extract X
+   - TypeScript: `throw new X(...)`, `throw X` — extract X
+   - Go: `return ..., X` where X is an error value / `return ..., fmt.Errorf(...)` — extract X or the `Err*` sentinel name
+   - Rust: `return Err(X)`, `Err(X)?`, `?` on a `Result<_, X>` — extract X
+   - Java: `throw new X(...)` — extract X
+
+   Deduplicate. For each, attempt to resolve the error code constant (grep the error class definition for a `code = "..."` / `const code` / derive macro parameter). Record as `{type, code}`. If code cannot be statically resolved, record `{type, code: null}`.
+
+3. **`side_effects[]`** — in source order, collect calls matching these observable-effect patterns:
+   - Lock acquisition: `lock.acquire()`, `mu.Lock()`, `self.lock.lock()`, `with self._lock:`, `Arc::clone`'s owned mutations
+   - Lock release: `lock.release()`, `mu.Unlock()`, end of `with` block
+   - Event emission: `emit(`, `publish(`, `dispatch(`, `notify(`
+   - Index / storage mutation: `self._index[...] = ...`, `this.index.set(`, `m[k] = v`, `index.insert(`
+   - I/O: `open(`, `write(`, `fs.writeFile(`, `io.Write(`, `sqlx::query!`, `http.Post(`
+   - Self-state mutation: `self.x = ...` / `this.x = ...` / `s.x = ...` (Rust/Go with `&mut self`)
+
+   Normalize each to a short snake_case descriptor (e.g., `acquire_write_lock`, `emit_registered_event`, `insert_into_index`). Return in source order. If a side effect occurs inside a branch, still record it at its textual position (same rule as checkpoint extraction).
+
+4. **`return_shape`** — look at every `return` / implicit-return expression reachable without an error. Classify:
+   - `None` / `void` / `()` / `unit`
+   - `<literal>` (primitive literal)
+   - `<type_constructor>(...)` (constructed object — record the type)
+   - `raises` (method always throws — never returns)
+   - `mixed` (multiple different shapes — flag as concern)
+
+5. **`properties`**:
+   - `async` — true iff signature declares async / returns Promise / returns `impl Future`
+   - `thread_safe` — true iff method body (or a wrapping decorator / with-block) acquires a lock before any state mutation, OR method is pure, OR method operates only on stack-local data. Otherwise false. If ambiguous, return `null`.
+   - `pure` — true iff no self/this writes, no external I/O, no argument mutation. Otherwise false.
+   - `idempotent` — return `null` (cannot be inferred statically in general). Exception: if the method body is literally `if X in self._set: return; self._set.add(X)` or equivalent obvious dedup pattern, return true.
+   - `reentrant` — return `null` (cannot be inferred statically without reachability analysis).
+
+**Structural sub-agent output.** In the API summary returned by each repo's sub-agent (see sync `references/extract-api-prompt.md`), add a `CONTRACT:` sub-block for every method inside every class, and for every top-level function:
+
+```
+CLASSES:
+- Registry
+  methods:
+    - register(id: str, module: Module) -> None
+      skeleton: [...]
+      contract:
+        inputs:
+          - id: str, required, validates[match_pattern], reject_with=InvalidIdError
+          - module: Module, required, validates[isinstance], reject_with=TypeError
+        errors_raised: [InvalidIdError(INVALID_ID), DuplicateError(DUPLICATE), DependencyError(DEPENDENCY_MISSING)]
+        side_effects: [acquire_write_lock, validate_inputs, resolve_dependencies, insert_into_index, emit_registered_event, release_write_lock]
+        return_shape: None
+        properties: { async: false, thread_safe: true, pure: false, idempotent: null, reentrant: null }
+```
+
+**Rules:**
+1. **Mandatory for every public method** — unlike skeleton, contract extraction is not gated on any flag or spec declaration. Every sub-agent MUST return a `contract` object per method.
+2. **Conservative inference** — if a field cannot be statically determined, return `null`. Never invent.
+3. **Degraded-mode usefulness** — even when the spec has no `## Contract` block, the extracted contract records from multiple repos can be cross-compared to surface divergence (e.g., Python raises `DuplicateError` but TS silently returns — surfaced as cross-repo finding even with no spec authority).
+4. **Budget** — keep the total `contract` block under ~500 bytes per method to stay within sub-agent output limits.
 
 **Step E.5: Extraction Verification**
 
