@@ -1,20 +1,28 @@
 ---
-description: "Spec-driven test generation and cross-language test verification for the apcore ecosystem. Checks runtime behavior against authoritative specs and shared conformance fixtures."
-argument-hint: "[<repos...>] [--spec <feature>] [--mode generate|run|full] [--category unit|integration|boundary|protocol|contract|conformance|all] [--save report.md]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: "Spec-driven test generation and cross-language test verification for\
+  \ the apcore ecosystem. Reads the authoritative spec for each project type (PROTOCOL_SPEC.md\
+  \ for core, SRS/Tech Design for MCP/A2A/CLI, feature specs for toolkit) to generate\
+  \ test cases, runs them across all language implementations in parallel, and reports\
+  \ behavioral inconsistencies. Acts as the ecosystem's quality gatekeeper \u2014\
+  \ audit checks static consistency, tester checks runtime correctness."
+argument-hint: /apcore-skills:tester [<repos...>] [--spec <feature>] [--mode generate|run|full]
+  [--category unit|integration|boundary|protocol|contract|conformance|all] [--save
+  report.md]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Apcore Skills — Tester
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual testing", "回退到手动 tester", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -86,7 +94,7 @@ Step 0 (ecosystem) → Step 1 (parse args + load specs + load Contracts + load c
 
 ### Step 0: Ecosystem Discovery
 
-@./references/shared/ecosystem.md
+@../references/shared/ecosystem.md
 
 ---
 
@@ -106,7 +114,7 @@ Step 0 (ecosystem) → Step 1 (parse args + load specs + load Contracts + load c
    - `docs-site` repo (`apcore-a2a`) → test ALL a2a-bridge repos
    - `integration` repo → test only this repo (spec: self)
    - Any other recognized type (e.g., `cli`, `tooling`, `shared-lib`) → test only this repo (spec: self — uses own docs/)
-   - CWD not an apcore repo → use `AskUserQuestion` to ask which repos to test
+   - CWD not an apcore repo → use `ask_user` to ask which repos to test
 3. Display: "Test scope: {repo-names} (from CWD). Specify repos explicitly for different scope."
 
 #### 1.2 Resolve Spec Source for Target Repos
@@ -232,14 +240,14 @@ Scan each scope's doc repo for `tests/conformance/**/*.yaml`:
 - toolkit scope: `apcore-toolkit/tests/conformance/`
 
 For each fixture file found:
-1. Parse per `./references/shared/conformance-fixtures.md`. Extract `method`, `contract_ref`, `setup`, `cases[]`, `properties_check`.
+1. Parse per `shared/conformance-fixtures.md`. Extract `method`, `contract_ref`, `setup`, `cases[]`, `properties_check`.
 2. Cross-check fixture coverage against the referenced Contract block:
    - Every `### Inputs` validation with `reject_with` must have at least one matching case → else WARNING `"fixture {F} does not cover input rule {rule} from Contract"`.
    - Every `### Errors` entry must have at least one case → else WARNING.
    - Every `### Properties` true value must have a corresponding case (concurrency for `thread_safe`, repeat-call for `idempotent`, etc.) → else WARNING.
 3. Store as `conformance_fixtures[method] = fixture_obj`.
 
-If no fixtures found, emit INFO finding `"no conformance fixtures in {doc_repo}/tests/conformance/ — cross-language equivalence will be checked only via per-language clause tests (lower fidelity). Create fixtures per ./references/shared/conformance-fixtures.md."`
+If no fixtures found, emit INFO finding `"no conformance fixtures in {doc_repo}/tests/conformance/ — cross-language equivalence will be checked only via per-language clause tests (lower fidelity). Create fixtures per shared/conformance-fixtures.md."`
 
 Missing fixtures do not fail the run. They only reduce the confidence of the "protocol" and "conformance" categories.
 

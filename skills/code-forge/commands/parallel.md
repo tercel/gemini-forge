@@ -1,20 +1,24 @@
 ---
-description: "Dispatch independent sub-agents for concurrent investigation and fixing of unrelated problems"
-argument-hint: "\"problem A\" \"problem B\" ..."
-allowed-tools: [Read, Glob, Grep, Bash, AskUserQuestion, Task, Agent]
+description: "Use when facing 2+ independent problems that can be solved concurrently\
+  \ \u2014 dispatches one sub-agent per problem domain for parallel investigation\
+  \ and fixing. For parallel task execution within a feature, use code-forge:impl\
+  \ instead."
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Parallel
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual handling", "回退到手动处理", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -63,9 +67,9 @@ Group dependent problems together. Each independent group gets its own agent.
 
 ### Step 3: Dispatch Agents
 
-For each independent problem group, launch a `Agent(subagent_type="general-purpose")`:
+For each independent problem group, launch a `generalist(subagent_type="general-purpose")`:
 
-**Agent prompt structure:**
+**generalist prompt structure:**
 ```
 You are investigating and fixing: {problem description}
 
@@ -86,7 +90,7 @@ You are investigating and fixing: {problem description}
 - Summary of fix (1-2 sentences)
 ```
 
-**CRITICAL:** Launch all agents in a single message using multiple `Agent` tool calls. This enables true parallel execution.
+**CRITICAL:** Launch all agents in a single message using multiple `generalist` tool calls. This enables true parallel execution.
 
 ### Step 4: Review and Integrate
 
@@ -101,9 +105,9 @@ After all agents complete:
 ```
 Parallel dispatch complete: {N} agents, {M} problems resolved
 
-Agent 1: {problem} → {root cause} → {status}
-Agent 2: {problem} → {root cause} → {status}
-Agent 3: {problem} → {root cause} → {status}
+generalist 1: {problem} → {root cause} → {status}
+generalist 2: {problem} → {root cause} → {status}
+generalist 3: {problem} → {root cause} → {status}
 
 Full test suite: {pass}/{total} passing
 ```
@@ -119,9 +123,9 @@ Independence check:
   payment ←→ email: independent
 
 Dispatch 3 agents in a single message:
-  Agent 1: "Fix auth.test.ts — files: src/auth/, error: missing token validation"
-  Agent 2: "Fix payment.test.ts — files: src/payment/, error: decimal precision"
-  Agent 3: "Fix email.test.ts — files: src/email/, error: template not found"
+  generalist 1: "Fix auth.test.ts — files: src/auth/, error: missing token validation"
+  generalist 2: "Fix payment.test.ts — files: src/payment/, error: decimal precision"
+  generalist 3: "Fix email.test.ts — files: src/email/, error: template not found"
 
 Results: 3/3 resolved, full suite 128/128 passing
 ```

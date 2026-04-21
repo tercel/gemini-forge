@@ -1,20 +1,24 @@
 ---
-description: "Systematic root cause debugging — investigation before fixes, hypothesis testing, and TDD verification"
-argument-hint: "\"bug description\""
-allowed-tools: [Read, Glob, Grep, Bash, AskUserQuestion]
+description: "Use when encountering any bug, test failure, or unexpected behavior\
+  \ \u2014 enforces root cause investigation before fixes. Prevents symptom-fixing,\
+  \ masking bugs, and \"just try this\" approaches. For code-forge features, use code-forge:fix\
+  \ instead."
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Debug
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual debugging", "回退到手动 debug", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -56,7 +60,7 @@ Complete each phase before moving to the next.
 
 ### Phase 1: Root Cause Investigation
 
-1. **Read error messages carefully** — complete messages, not skimmed
+1. **read_file error messages carefully** — complete messages, not skimmed
 2. **Reproduce consistently** — can you trigger it reliably?
 3. **Check recent changes** — `git diff`, `git log` for what changed
 4. **Gather evidence** — add diagnostic instrumentation at each boundary in multi-component systems
@@ -109,7 +113,7 @@ Phase 3 — Hypothesis:
   Test: hardcode known id=1 → returns null. Confirmed.
 
 Phase 4 — Fix:
-  Write test: expect(getProfile(1)).resolves.toMatchObject({id: 1})
+  write_file test: expect(getProfile(1)).resolves.toMatchObject({id: 1})
   Fix: use parameterized query ($1) instead of string interpolation
   Verify: test passes, full suite 42/42 green
 ```

@@ -8,7 +8,7 @@ Search for the ecosystem root by looking for the `apcore` protocol specification
 
 1. Check current directory for `.apcore-skills.json` — if found, read `ecosystem_root` from it
 2. Search upward from the current directory, checking each ancestor directory for an `apcore/` subdirectory containing `PROTOCOL_SPEC.md`. Continue until the filesystem root is reached or a match is found.
-3. If not found: use `AskUserQuestion` to ask for ecosystem root path
+3. If not found: use `ask_user` to ask for ecosystem root path
 
 Store `ecosystem_root` — the parent directory containing all apcore repos.
 
@@ -100,7 +100,7 @@ Determine `cwd_repo` — the repo the user is currently working in:
    - Other `apcore-{type}-{lang}` patterns → `scope_group = "{type}"`
 4. If not matched, `cwd_repo = null`
 
-This is used by sync, audit, and release as the **default scope** when `--scope` is not specified. If `cwd_repo` is null (CWD is not an apcore repo), each skill should use `AskUserQuestion` to let the user pick a target repo instead of silently scanning everything.
+This is used by sync, audit, and release as the **default scope** when `--scope` is not specified. If `cwd_repo` is null (CWD is not an apcore repo), each skill should use `ask_user` to let the user pick a target repo instead of silently scanning everything.
 
 #### 0.4 Load Configuration
 

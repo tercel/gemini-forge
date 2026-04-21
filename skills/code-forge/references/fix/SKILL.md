@@ -10,13 +10,13 @@ description: >
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0.1 (Multi-Repo Detection), then Step 0.5, then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0.1 (Multi-Repo Detection), then Step 0.5, then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual fix", "回退到手动 fix", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `AskUserQuestion` if a step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `ask_user` if a step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -99,7 +99,7 @@ Accept input in three modes:
 - Ends with `.md` (e.g., `bug-123.md`)
 - Matches an existing file or directory on disk
 
-**Action:** Use `AskUserQuestion`:
+**Action:** Use `ask_user`:
 
 ```
 Your input looks like a file path: "{input}"
@@ -112,7 +112,7 @@ Did you mean to use file mode? (file paths require an @ prefix)
 
 ---
 
-If no input provided, use `AskUserQuestion` to ask: "Describe the bug you encountered."
+If no input provided, use `ask_user` to ask: "Describe the bug you encountered."
 
 For prompt text and file reference modes, store the bug description and continue to Step 2.
 
@@ -131,7 +131,7 @@ Locate and parse the review report. The review report lives **in the current con
 2. **Saved file (fallback):** Only if no review report exists in the current conversation:
    - With feature name (`--review my-feature`): read `{output_dir}/{feature_name}/review.md`
    - Without feature name (`--review`): search `{output_dir}/project-review.md` first, then scan `{output_dir}/*/review.md`
-   - If multiple found: use `AskUserQuestion` to let user select
+   - If multiple found: use `ask_user` to let user select
 
 3. **Neither found:** Show error — "No review report found in this session. Run `/code-forge:review` first, or `/code-forge:review --save` to persist to disk."
 
@@ -158,7 +158,7 @@ Locate and parse the review report. The review report lives **in the current con
      ...
    ```
 
-   Use `AskUserQuestion`: "Fix all {N} issues? Or enter issue numbers to fix selectively (e.g., `1,3,5`)."
+   Use `ask_user`: "Fix all {N} issues? Or enter issue numbers to fix selectively (e.g., `1,3,5`)."
 
    - **"all" / "yes"** → process all issues
    - **Comma-separated numbers** → process only selected issues
@@ -243,7 +243,7 @@ Attempt to associate the bug with an existing code-forge feature:
 3. **Match found** → load the feature's `plan.md` and relevant `tasks/*.md` as additional context. Note the feature name.
 4. **No match found** → mark as standalone bug. Skip upstream trace-back (Steps 5 and 7). Proceed with code-only fix.
 
-If multiple features match, use `AskUserQuestion` to let user select the most relevant one.
+If multiple features match, use `ask_user` to let user select the most relevant one.
 
 ---
 
@@ -309,7 +309,7 @@ Upstream documents affected:
 
 #### 5.2 Per-Level Confirmation
 
-For each affected upstream level (from lowest to highest), use `AskUserQuestion`:
+For each affected upstream level (from lowest to highest), use `ask_user`:
 
 "Root cause traced to **{level_name}**: `{doc_path}` — {what's wrong}. Update this document?"
 

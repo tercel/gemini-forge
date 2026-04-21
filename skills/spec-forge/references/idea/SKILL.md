@@ -133,7 +133,7 @@ Actions:
   Enter a new name to start brainstorming
 ```
 
-Use `AskUserQuestion` to let the user choose.
+Use `ask_user` to let the user choose.
 
 #### 1.3 Check Existing State
 
@@ -173,7 +173,7 @@ This is the first session for a brand new idea. The goal is to understand the us
 
 #### 2.1 Open-Ended Discovery
 
-Use `AskUserQuestion` with open questions. Ask 2-3 at a time, adapt follow-ups based on answers.
+Use `ask_user` with open questions. Ask 2-3 at a time, adapt follow-ups based on answers.
 
 **Round 1 — The Spark:**
 - What's the idea? Describe it however you like (one sentence or a paragraph)
@@ -353,7 +353,7 @@ Research backlog:
 
 #### 3.2 Choose Session Focus
 
-Use `AskUserQuestion`:
+Use `ask_user`:
 - **Explore** — I have new thoughts or want to brainstorm further
 - **Research** — Let's investigate the market, competitors, or user needs
 - **Validate** — Challenge assumptions, check if this is a real need

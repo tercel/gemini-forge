@@ -1,7 +1,9 @@
 ---
 description: "Apcore ecosystem dashboard — ONLY when user explicitly invokes /apcore-skills. Do NOT auto-trigger based on project name or directory."
 argument-hint: "[sync|sdk|integration|audit|release|tester] [args...]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
 
 You are the apcore-skills orchestrator. Your job is to route subcommands or display the ecosystem dashboard.
@@ -78,7 +80,7 @@ Commands:
       Coordinated multi-repo release
 ```
 
-Use `AskUserQuestion` to ask what to do next.
+Use `ask_user` to ask what to do next.
 
 ### Route B: Subcommand dispatch
 

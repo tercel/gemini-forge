@@ -1,20 +1,25 @@
 ---
-description: "Port a project to a new target language — initializes project skeleton, analyzes reference, and batch-generates implementation plans"
-argument-hint: "@docs-project --lang <language> [--ref <reference-impl>]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, Agent]
+description: "Port a documentation-driven project to a new target language \u2014\
+  \ initializes project skeleton, analyzes reference implementation, and batch-generates\
+  \ plans for selected features. Use when converting a project to another language,\
+  \ rewriting in a different language, or creating a multi-language SDK from existing\
+  \ feature specs."
+argument-hint: /code-forge:port @<docs-project> --ref <reference-impl> --lang <target-language>
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Port
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual port", "回退到手动 port", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -45,7 +50,7 @@ Port a project to a new target language by batch-generating implementation plans
 | `--ref <name>` | No | Reference implementation project name (sibling directory) or absolute path |
 | `--lang <language>` | Yes | Target language: `java`, `typescript`, `go`, `rust`, etc. |
 
-Missing required parameters → use `AskUserQuestion` to collect interactively.
+Missing required parameters → use `ask_user` to collect interactively.
 
 ## Workflow
 
@@ -74,7 +79,7 @@ Step 2 and Step 6 are offloaded to sub-agents. Step 2 uses a single sub-agent to
 
 #### 1.1 Resolve Docs Project Path
 
-**1.1.0 Path-Like Input Guard:** If the docs project argument does NOT start with `@` but looks like a path (contains `/`, starts with `.`, or matches an existing directory on disk), use `AskUserQuestion`:
+**1.1.0 Path-Like Input Guard:** If the docs project argument does NOT start with `@` but looks like a path (contains `/`, starts with `.`, or matches an existing directory on disk), use `ask_user`:
 
 ```
 Your input looks like a directory path: "{input}"
@@ -113,7 +118,7 @@ Validate `--lang` value. Recognized identifiers:
 #### 1.4 Derive Target Project Path
 
 - Default: `<docs-project>/../<docs-name>-<lang>/` (e.g., `../apcore-java/`)
-- Display derived path and use `AskUserQuestion`:
+- Display derived path and use `ask_user`:
   - "Use `{derived-path}` (Recommended)" — proceed
   - "Custom path" — user provides path
 
@@ -134,7 +139,7 @@ Proceed directly — no confirmation needed.
 
 **Skip if `ref_project_path` is null.**
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Analyze reference implementation"`
 
@@ -143,7 +148,7 @@ Spawn an `Agent` tool call with:
 ```
 Analyze the reference implementation at {ref_project_path} for a cross-language porting operation.
 
-Read the following files:
+read_file the following files:
 1. {ref_project_path}/planning/overview.md — project-level overview with dependency graph
 2. All {ref_project_path}/planning/*/plan.md — implementation plans per feature
 3. All {ref_project_path}/planning/*/state.json — completion status per feature
@@ -202,10 +207,10 @@ Feature specs discovered: 7 (from ../apcore/docs/features/)
   ...
 ```
 
-Use `AskUserQuestion`:
+Use `ask_user`:
 - Question: "Which features do you want to port to {lang}?"
 - First option: "All features (Recommended)" — if selected, set `selected_features` to the full list
-- Remaining options: one per feature — if the user wants multiple (but not all), run additional `AskUserQuestion` rounds until they say "done"
+- Remaining options: one per feature — if the user wants multiple (but not all), run additional `ask_user` rounds until they say "done"
 
 Store `selected_features[]`.
 
@@ -213,7 +218,7 @@ Store `selected_features[]`.
 
 ### Step 4: Confirm Target Tech Stack
 
-Use a **single** `AskUserQuestion` with up to 3 questions based on target language. Skip questions that have obvious single answers.
+Use a **single** `ask_user` with up to 3 questions based on target language. Skip questions that have obvious single answers.
 
 **For Java:**
 - Question 1 — Build tool: "Maven (Recommended)" / "Gradle"
@@ -244,7 +249,7 @@ Store `tech_stack` decisions.
 #### 5.1 Create Target Directory
 
 1. If target directory already exists:
-   - Use `AskUserQuestion`: "Target directory `{path}` already exists."
+   - Use `ask_user`: "Target directory `{path}` already exists."
      - "Update config only (Recommended)" — overwrite `.code-forge.json`, keep everything else
      - "Use as-is" — skip all initialization, jump to Step 6
      - "Cancel" — stop
@@ -252,13 +257,13 @@ Store `tech_stack` decisions.
 
 **Do NOT copy feature specs:** Never copy `docs/features/` or any feature spec files from the docs project into the target project. Feature specs are accessed from the source docs project via relative paths configured in `directories.input`. The target project must NOT contain its own copy of feature specs.
 
-If the user explicitly requests local copies of feature specs, use `AskUserQuestion` to confirm before copying:
+If the user explicitly requests local copies of feature specs, use `ask_user` to confirm before copying:
 - "Copy feature specs locally (creates `docs/features/` in target)" — copy and update `directories.input` to `"docs/features/"`
 - "Keep remote references (Recommended)" — do not copy, keep relative path in config
 
 #### 5.2 Generate .code-forge.json
 
-Write to `<target-path>/.code-forge.json`:
+write_file to `<target-path>/.code-forge.json`:
 
 ```json
 {
@@ -294,7 +299,7 @@ If no reference: omit `reference_docs.sources` and `port.reference_impl`.
 
 #### 5.3 Generate Project Skeleton (Sub-agent)
 
-Spawn an `Agent` sub-agent (`subagent_type: "general-purpose"`):
+Spawn an `generalist` sub-agent (`subagent_type: "general-purpose"`):
 
 **Sub-agent prompt:**
 
@@ -363,7 +368,7 @@ mkdir -p <target>/planning/<feature>/tasks/
 
 **6.1.3 Dispatch Plan Sub-agent**
 
-Spawn an `Agent` sub-agent (`subagent_type: "general-purpose"`):
+Spawn an `generalist` sub-agent (`subagent_type: "general-purpose"`):
 
 **Sub-agent prompt:**
 
@@ -383,7 +388,7 @@ Generate an implementation plan for porting the "{feature}" feature to {lang}.
 {reference_summary — the per-feature section for this feature from Step 2}
 
 ## Output Files
-Write ALL of the following files:
+write_file ALL of the following files:
 
 ### 1. {target}/planning/{feature}/plan.md
 Required sections:
@@ -489,7 +494,7 @@ After sub-agent completes, parse its summary and create `<target>/planning/<feat
 
 If a sub-agent fails for a feature:
 - Display: `[{i}/{total}] {feature} — FAILED: {error summary}`
-- Use `AskUserQuestion`: "Feature planning failed."
+- Use `ask_user`: "Feature planning failed."
   - "Skip and continue" — mark as skipped, continue to next feature
   - "Skip all future failures" — auto-skip any remaining failures without prompting
   - "Retry" — re-dispatch sub-agent

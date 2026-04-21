@@ -20,9 +20,9 @@
 ```
 Implement the feature '{feature_name}' in this repository.
 
-1. Read {output_dir}/{feature_name}/state.json to find pending tasks
+1. read_file {output_dir}/{feature_name}/state.json to find pending tasks
 2. For each pending task in execution_order:
-   a. Read the task file from tasks/ directory
+   a. read_file the task file from tasks/ directory
    b. Follow TDD: write tests -> run tests (expect fail) -> implement -> run tests (expect pass)
    c. Commit changes with a descriptive message after tests pass
    d. Update the task status to "completed" in state.json

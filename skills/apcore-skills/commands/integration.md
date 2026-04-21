@@ -1,20 +1,25 @@
 ---
-description: "Bootstrap a new framework integration for apcore. Scaffolds the project with endpoint scanners, configuration system, context mapping, CLI commands, demo project, and Docker setup. Learns patterns from existing integrations (django-apcore, flask-apcore, nestjs-apcore)."
-argument-hint: "<framework> [--lang python|typescript|go] [--ref django-apcore]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: Bootstrap a new framework integration for apcore. Scaffolds the project
+  with endpoint scanners, configuration system, context mapping, CLI commands, demo
+  project, and Docker setup. Learns patterns from existing integrations (django-apcore,
+  flask-apcore, nestjs-apcore).
+argument-hint: /apcore-skills:integration <framework> [--lang python|typescript|go]
+  [--ref django-apcore]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Apcore Skills — Integration
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual bootstrap", "回退到手动 integration", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -77,7 +82,7 @@ Step 0 (ecosystem) → 1 (parse args) → 2 (analyze reference) → 3 (framework
 
 ### Step 0: Ecosystem Discovery
 
-@./references/shared/ecosystem.md
+@../references/shared/ecosystem.md
 
 ---
 
@@ -85,7 +90,7 @@ Step 0 (ecosystem) → 1 (parse args) → 2 (analyze reference) → 3 (framework
 
 Parse `$ARGUMENTS`:
 
-1. Extract `<framework>` — required, use `AskUserQuestion` if missing
+1. Extract `<framework>` — required, use `ask_user` if missing
 2. Extract `--lang` — auto-detect from framework:
    - Python frameworks: `fastapi`, `flask`, `django`, `starlette`, `falcon`, `tornado`
    - TypeScript frameworks: `express`, `fastify`, `nestjs`, `hono`, `koa`
@@ -114,13 +119,13 @@ Integration Bootstrap:
 
 ### Step 2: Analyze Reference Integration (Sub-agent)
 
-Spawn `Agent(subagent_type="general-purpose")`:
+Spawn `generalist(subagent_type="general-purpose")`:
 
 **Sub-agent prompt:**
 ```
 Analyze the reference integration at {ref_path} to understand the pattern for apcore framework integrations.
 
-Read the following key files:
+read_file the following key files:
 1. Main extension/app file (extension.py, apps.py, or module entry)
 2. Config file (config.py, settings.py) — extract all APCORE_* settings
 3. Scanner directory (scanners/) — how framework endpoints are discovered
@@ -172,13 +177,13 @@ Error handling:
 Keep summary to ~3-4KB.
 ```
 
-Store as `ref_analysis`. If sub-agent returns STATUS: NOT_FOUND, use `AskUserQuestion` to provide a different reference or proceed without reference (scaffold from conventions only).
+Store as `ref_analysis`. If sub-agent returns STATUS: NOT_FOUND, use `ask_user` to provide a different reference or proceed without reference (scaffold from conventions only).
 
 ---
 
 ### Step 3: Framework-Specific Research
 
-Use `AskUserQuestion` to gather framework-specific information:
+Use `ask_user` to gather framework-specific information:
 
 - Question 1: "Which {framework} routing mechanism should the scanner target?"
   - Options based on framework (e.g., for FastAPI: "Path operations (Recommended)" / "APIRouter" / "Both")
@@ -193,9 +198,9 @@ Store `framework_config`.
 
 ### Step 4: Scaffold Project (Sub-agent)
 
-@./references/shared/conventions.md (refer to "Framework Integration structure" section)
+@../references/shared/conventions.md (refer to "Framework Integration structure" section)
 
-Spawn `Agent(subagent_type="general-purpose")`:
+Spawn `generalist(subagent_type="general-purpose")`:
 
 **Sub-agent prompt:**
 ```
@@ -311,7 +316,7 @@ Verify after sub-agent:
 
 If demo directory wasn't fully created by Step 4, create it:
 
-Write a minimal demo app that:
+write_file a minimal demo app that:
 1. Creates a {framework} app with 3-5 sample CRUD endpoints
 2. Integrates apcore via the extension
 3. Includes `docker-compose.yml` with:
@@ -323,7 +328,7 @@ Write a minimal demo app that:
 
 ### Step 6: Generate Code-Forge Config and Feature Specs
 
-Write `.code-forge.json` and generate feature specs for code-forge planning.
+write_file `.code-forge.json` and generate feature specs for code-forge planning.
 
 Feature specs to generate (one per core capability):
 1. `scanner.md` — Endpoint scanning for this framework
@@ -342,10 +347,10 @@ Each feature spec MUST include:
 
 #### 6.1 Configuration Settings — Canonical Source
 
-`config.md` feature spec and `src/{package}/config.{ext}` MUST source `APCORE_*` setting names / types / defaults from `./references/shared/conventions.md` → "Required settings" list. Do NOT invent new settings inside an integration. If the framework genuinely requires a new setting:
+`config.md` feature spec and `src/{package}/config.{ext}` MUST source `APCORE_*` setting names / types / defaults from `shared/conventions.md` → "Required settings" list. Do NOT invent new settings inside an integration. If the framework genuinely requires a new setting:
 1. Name it with the prefix `APCORE_{FRAMEWORK}_*` (e.g., `APCORE_FASTAPI_ROUTE_PREFIX`), not bare `APCORE_*`
 2. Document the rationale in `docs/features/config.md` under a `### Framework-specific settings` section
-3. File a PR against `./references/shared/conventions.md` only if the setting is universally applicable
+3. File a PR against `shared/conventions.md` only if the setting is universally applicable
 
 audit D7 flags any bare `APCORE_*` setting in an integration that is not in the canonical list.
 
@@ -392,3 +397,11 @@ Next steps:
   /code-forge:impl scanner                          Implement scanner
   /apcore-skills:sync                                Verify consistency with other integrations
 ```
+
+## Coordination with Other Skills
+
+- **After integration:** Use `code-forge:plan` per feature spec to plan implementation
+- **During implementation:** Use `code-forge:impl` to execute TDD tasks
+- **After each feature:** Use `code-forge:review` to review quality
+- **Cross-integration consistency:** Use `apcore-skills:audit --scope integrations`
+- **For release:** Use `apcore-skills:release` (integration versions are independent)

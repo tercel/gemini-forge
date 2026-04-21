@@ -43,7 +43,7 @@ The project profile informs the decomposition: a monorepo with multiple apps has
 
 ### Step 2: Scope Interview
 
-Use AskUserQuestion to understand project boundaries. Ask 3-5 rounds of questions, adapting based on answers.
+Use ask_user to understand project boundaries. Ask 3-5 rounds of questions, adapting based on answers.
 
 **Round 1 — The Shape:**
 - What are the main functional areas or modules of this project? (e.g., "auth, payments, notifications" or "it's a single API endpoint")
@@ -140,7 +140,7 @@ Split Rationale:
 ```
 
 2. Present the proposed split structure **together with the rationale** to the user for confirmation
-3. Use AskUserQuestion: "Here's my proposed breakdown and the reasoning behind it. Does this look right, or would you change anything?"
+3. Use ask_user: "Here's my proposed breakdown and the reasoning behind it. Does this look right, or would you change anything?"
 4. If the user wants changes, adjust rationale accordingly and re-confirm
 5. Once confirmed, write the manifest to `docs/project-{name}.md`
 

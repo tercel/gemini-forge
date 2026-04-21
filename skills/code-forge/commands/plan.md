@@ -1,20 +1,24 @@
 ---
-description: "Use when creating an implementation plan from docs or requirements — generates TDD tasks with progress tracking"
-argument-hint: "[@feature-doc.md | \"requirement description\"]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: Analyze documentation (or a prompt) and generate an implementation plan
+  with task breakdown, TDD steps, and progress tracking. Use when breaking down a
+  feature, creating tasks from docs or requirements, planning implementation work,
+  or turning a spec into actionable steps.
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Plan
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0 (Configuration), then Step 0.5 (Project Analysis), then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file Step 0 (Configuration), then Step 0.5 (Project Analysis), then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual planning", "回退到手动 plan", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `AskUserQuestion` if a step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `ask_user` if a step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -38,7 +42,7 @@ Generate an implementation plan from a feature document or a requirement prompt.
 | "I'll add FE-01- prefixes to feature directories for clarity" | Feature directory names must match the source filename exactly in kebab-case. `core-dispatcher`, not `FE-01-core-dispatcher`. |
 | "I'll generate all features as flat files in one directory" | Each feature gets its own subdirectory with the full multi-file structure. Flat files break all downstream skills. |
 | "Step 4.5 reuse discovery is optional, the user just wants the plan" | Step 4.5 is mandatory. Skipping it is the #1 cause of bloat across spec-forge / code-forge / apcore-skills workflows — the planner ends up generating tasks that recreate utilities, helpers, and entire subsystems that already exist. |
-| "I'll just trust the LLM to know what already exists" | The LLM does not know. It must `Grep` and `Read` the actual project. Step 4.5 forces this empirically. |
+| "I'll just trust the LLM to know what already exists" | The LLM does not know. It must `grep_search` and `read_file` the actual project. Step 4.5 forces this empirically. |
 
 ## When to Use
 
@@ -55,7 +59,7 @@ Input → Analysis → Reuse Discovery → Planning → Task Breakdown → Statu
 
 ## Context Management
 
-Steps 4, 4.5, 7, and 8 are offloaded to sub-agents via the `Agent` tool to prevent context window exhaustion on large projects. The main context retains only concise summaries returned by each sub-agent, while full document analysis, reuse discovery, file generation, and code implementation happen in isolated sub-agent contexts that are discarded after completion.
+Steps 4, 4.5, 7, and 8 are offloaded to sub-agents via the `generalist` tool to prevent context window exhaustion on large projects. The main context retains only concise summaries returned by each sub-agent, while full document analysis, reuse discovery, file generation, and code implementation happen in isolated sub-agent contexts that are discarded after completion.
 
 **Actual execution order:** Steps 0 through 13, in sequential order.
 
@@ -67,14 +71,14 @@ Step 9 (overview.md) executes after Steps 7 and 8 because it references task fil
 
 **Step 0.5: Project Analysis**
 
-Before planning, understand the project's architecture and tech stack. Read and execute:
+Before planning, understand the project's architecture and tech stack. read_file and execute:
 
 @../references/shared/project-analysis.md
 
 Execute PA.1 (Project Profile), PA.2 (Architecture Analysis), and PA.5 (Existing Test Assessment). This ensures:
 - Tasks are structured around the ACTUAL architecture (not assumed layers)
 - TDD steps reference the ACTUAL test framework
-- Task dependencies reflect REAL module relationships
+- task dependencies reflect REAL module relationships
 - Language-specific patterns are accounted for (e.g., Rust trait bounds, Go interfaces)
 
 The Project Context Summary (PA.7) is passed to the sub-agent in Step 4 as part of the context.
@@ -104,14 +108,14 @@ The Project Context Summary (PA.7) is passed to the sub-agent in Step 4 as part 
 
 If `reference_docs.sources` is empty or not configured, skip directly to Step 2.
 
-#### 1.1 Resolve Glob Patterns
+#### 1.1 Resolve glob Patterns
 
 1. Resolve each pattern in `config.reference_docs.sources` against `project_root`
 2. Apply `config.reference_docs.exclude` patterns to filter results
 3. Auto-exclude `{output_dir}/**` to prevent circular references
 4. Deduplicate results (same file matched by multiple patterns)
 5. If 0 files matched → display: `Reference docs: 0 files matched for configured patterns. Continuing without reference context.` → skip to Step 2
-6. If > 30 files matched → display file list, use `AskUserQuestion`: "Found {N} reference docs. This will spawn {N} parallel sub-agents."
+6. If > 30 files matched → display file list, use `ask_user`: "Found {N} reference docs. This will spawn {N} parallel sub-agents."
    - "Proceed with all {N} files"
    - "Let me refine the patterns" → show current `sources`/`exclude` config, stop and let user update `.code-forge.json`
 
@@ -129,7 +133,7 @@ Proceed directly — no confirmation needed (unless > 30 files triggered 1.1 ste
 
 #### 1.3 Parallel Sub-agent Summarization
 
-Spawn N parallel sub-agents via `Agent` tool, one per matched file:
+Spawn N parallel sub-agents via `generalist` tool, one per matched file:
 
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Summarize reference doc: {filename}"`
@@ -179,7 +183,7 @@ If the input starts with `@`, skip directly to Step 3.
 - Ends with `.md` (e.g., `user-auth.md`)
 - Matches an existing file or directory on disk
 
-**Action:** Do NOT silently proceed as prompt mode. Instead, use `AskUserQuestion`:
+**Action:** Do NOT silently proceed as prompt mode. Instead, use `ask_user`:
 
 ```
 Your input looks like a file/directory path: "{input}"
@@ -200,7 +204,7 @@ When a user provides a text prompt instead of a file path, code-forge:plan deleg
 
 Convert the prompt text to a kebab-case slug for the feature name:
 - ASCII text: lowercase, replace spaces/special chars with hyphens (e.g., "User Login Feature" → `user-login-feature`)
-- Non-ASCII text (Chinese, Japanese, etc.): use `AskUserQuestion` to let user confirm or provide a custom slug. Suggest a reasonable English slug based on the prompt meaning.
+- Non-ASCII text (Chinese, Japanese, etc.): use `ask_user` to let user confirm or provide a custom slug. Suggest a reasonable English slug based on the prompt meaning.
 
 #### 2.2 Check for Existing Feature Spec
 
@@ -212,7 +216,7 @@ Check if `{input_dir}/{slug}.md` already exists:
 
 Invoke `spec-forge:feature` to generate the feature spec:
 
-Launch `Agent(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 - Sub-agent prompt: "Invoke the spec-forge:feature skill for '{slug}'. The user's requirement is: '{original prompt text}'. Use standalone mode — generate the feature spec at docs/features/{slug}.md based on this requirement description. Keep the Q&A minimal since the user already provided context in the prompt."
 - Wait for completion → verify `docs/features/{slug}.md` exists
 
@@ -269,7 +273,7 @@ If the `@` path resolves to a **directory** (not a file):
 2. Exclude non-feature files from results: filter out `overview.md`, `README.md`, `index.md`, and any file that is clearly not a feature spec (e.g., changelog, license)
 3. If no `.md` files found: display error `"No feature specs found in {path}"` with the paths tried, then stop
 4. If exactly 1 file found: use it directly (skip selection)
-5. If multiple found: display list and use `AskUserQuestion` to let user select:
+5. If multiple files found: display list and use `ask_user` to let user select:
    ```
    Feature specs found in {path}:
      1. acl-system
@@ -321,7 +325,7 @@ On any error: display the issue, suggest a fix, and stop.
 
 Check whether `<output_dir>/<feature_name>/` already exists:
 
-- **Has `state.json`** → **Resume mode**: show progress summary (task statuses), ask via `AskUserQuestion`:
+- **Has `state.json`** → **Resume mode**: show progress summary (task statuses), ask via `ask_user`:
   - Continue (recommended) — resume from current progress
   - Restart — delete all files and regenerate
   - View plan — open plan.md
@@ -336,7 +340,7 @@ Check whether `<output_dir>/<feature_name>/` already exists:
 
 **Offload to sub-agent** to keep the full document content out of the main context.
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Analyze feature document"`
 
@@ -374,7 +378,7 @@ Skipping this step is the most common way that skill-driven planning produces pa
 
 **Offload to a sub-agent** to keep grep output and file reads out of the main context.
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Discover reusable code for {feature_name}"`
 
@@ -387,8 +391,8 @@ Spawn an `Agent` tool call with:
 **Sub-agent must do all of the following and return a structured report:**
 
 1. **Component-by-component reuse search.** For each entry in "Key Components" from the Step 4 summary:
-   - Grep the project for similar names, related keywords, and likely synonyms (e.g., for a planned `UserAuthService`, search for `auth`, `login`, `session`, `credential`, `User.*Service`, etc.)
-   - Read any matching files at least at signature level
+   - grep_search the project for similar names, related keywords, and likely synonyms (e.g., for a planned `UserAuthService`, search for `auth`, `login`, `session`, `credential`, `User.*Service`, etc.)
+   - read_file any matching files at least at signature level
    - Decide one of: `REUSE` (existing code already does this — do not build it), `EXTEND` (existing code is close — modify it), `NEW` (genuinely no overlap — build new)
 
 2. **Utility / helper survey.** Scan the project for existing utility modules (`utils/`, `lib/`, `helpers/`, `common/`, shared modules) and list utilities relevant to the planned work. Future tasks must prefer these over reimplementing.
@@ -449,7 +453,7 @@ Pass `reuse_report` into the Step 7 and Step 8 sub-agent prompts as a section ti
 
 ### Step 5: Ask for Additional Information
 
-If not clearly specified in the document, use a **single** `AskUserQuestion` combining up to 3 questions. Skip any question already answered by the document:
+If not clearly specified in the document, use a **single** `ask_user` combining up to 3 questions. Skip any question already answered by the document:
 
 **Question 1: Technology Stack Confirmation**
 - "Use {extracted_tech} mentioned in document"
@@ -509,7 +513,7 @@ Example with defaults: `planning/user-auth/`, `planning/user-auth/tasks/`, etc.
 
 **Offload to sub-agent** to keep plan generation output out of the main context.
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Generate implementation plan"`
 
@@ -556,7 +560,7 @@ Spawn an `Agent` tool call with:
 
 **Offload to sub-agent** to keep task file generation out of the main context.
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Generate task breakdown files"`
 
@@ -631,7 +635,7 @@ Each task object in the `tasks` array:
 
 | Field | Description |
 |-------|-------------|
-| `id` | Task identifier (matches filename without `.md`) |
+| `id` | task identifier (matches filename without `.md`) |
 | `file` | Relative path: `tasks/{id}.md` |
 | `title` | Human-readable task title |
 | `status` | `"pending"` initially |
@@ -663,7 +667,7 @@ Display: `Project overview updated: {output_dir}/overview.md`
 3. `tasks/` contains `.md` files with descriptive names (no numeric prefixes)
 4. `overview.md` exists and non-empty
 5. `state.json` is valid JSON with fields: `feature`, `status`, `execution_order`, `progress`, `tasks`
-6. Task count in `state.json` matches files in `tasks/`
+6. task count in `state.json` matches files in `tasks/`
 7. `{output_dir}/overview.md` (project-level) exists
 8. No files in `docs/plan/`, `docs/plans/`, `docs/planning/` — move if found
 
@@ -694,8 +698,8 @@ Optional (before implementation):
 
 ## Integration with Claude Code Tasks
 
-Optionally synchronize tasks to Claude Code's Task system:
-- For each task in `execution_order`, call `TaskCreate` with:
+Optionally synchronize tasks to Claude Code's task system:
+- For each task in `execution_order`, call `tracker_create_task` with:
   - `subject`: `"<task_id>: <task_title>"`
   - `description`: contents of the task file
   - `activeForm`: `"Implementing <task_title>"`
@@ -730,7 +734,7 @@ Optionally synchronize tasks to Claude Code's Task system:
     └── {feature}/             # Per-feature directory
         ├── overview.md        # Feature overview + task execution order
         ├── plan.md            # Implementation plan
-        ├── tasks/             # Task breakdown files
+        ├── tasks/             # task breakdown files
         └── state.json         # Status tracking
     ```
     This structure is mandatory, not a suggestion. Every file listed above must exist after plan generation completes.
@@ -748,7 +752,7 @@ Optionally synchronize tasks to Claude Code's Task system:
 - Treating a path-like input without `@` as a prompt instead of asking the user (Step 2.0 guard)
 - Skipping `state.json` — downstream skills (impl, status, fix, finish) cannot operate without it
 - Skipping project-level `overview.md` (Step 11)
-- Running Steps 4, 4.5, 7, 8 inline instead of delegating to sub-agents via `Agent` tool
+- Running Steps 4, 4.5, 7, 8 inline instead of delegating to sub-agents via `generalist` tool
 - Skipping Step 4.5 reuse discovery — this is the #1 source of incremental bloat across skill-driven workflows
 - Generating tasks that recreate symbols listed in `reuse_report` instead of extending the existing ones
 - Proceeding to Step 13 without running Step 12 verification

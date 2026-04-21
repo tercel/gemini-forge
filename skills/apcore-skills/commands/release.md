@@ -1,20 +1,25 @@
 ---
-description: "Coordinated multi-repo release pipeline for the apcore ecosystem. Handles version bumps across all version files, CHANGELOG generation from git history, cross-repo dependency updates, test verification, and staged commits. Only pushes after explicit user approval."
-argument-hint: "<version> [--scope core|mcp|integrations|all] [--dry-run]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: Coordinated multi-repo release pipeline for the apcore ecosystem. Handles
+  version bumps across all version files, CHANGELOG generation from git history, cross-repo
+  dependency updates, test verification, and staged commits. Only pushes after explicit
+  user approval.
+argument-hint: /apcore-skills:release <version> [--scope core|mcp|integrations|all]
+  [--dry-run]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Apcore Skills — Release
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint. **Never push without explicit user approval — this is enforced by the workflow's user-confirmation checkpoints, not optional.**
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint. **Never push without explicit user approval — this is enforced by the workflow's user-confirmation checkpoints, not optional.**
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual release", "回退到手动 release", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -68,7 +73,7 @@ Steps 3, 4, and 6 use parallel sub-agents (one per repo) for speed. The main con
 
 ### Step 0: Ecosystem Discovery
 
-@./references/shared/ecosystem.md
+@../references/shared/ecosystem.md
 
 ---
 
@@ -87,7 +92,7 @@ Parse `$ARGUMENTS`:
 2. Look up in discovered ecosystem:
    - If it's a known apcore repo → release **only this repo**
    - If CWD is a `protocol`/`docs-site` repo → error: "Documentation repos cannot be released directly. Specify --scope core|mcp|all."
-   - If CWD is not an apcore repo → use `AskUserQuestion` to ask: "CWD is not an apcore repo. Which repo do you want to release?" with options from `repos[]` names + "All repos (group release)"
+   - If CWD is not an apcore repo → use `ask_user` to ask: "CWD is not an apcore repo. Which repo do you want to release?" with options from `repos[]` names + "All repos (group release)"
 3. Display: "Release scope: {repo-name} (from CWD). Use --scope core|mcp|all for group release."
 
 **If `--scope` IS specified:** use explicit scope.
@@ -99,11 +104,11 @@ Parse `$ARGUMENTS`:
 | (cwd default) | Only the CWD repo |
 | `core` | All core SDKs |
 | `mcp` | All MCP bridges |
-| `integrations` | Use `AskUserQuestion` to select which integrations |
-| `all` | All repos (use `AskUserQuestion` to confirm version per group) |
+| `integrations` | Use `ask_user` to select which integrations |
+| `all` | All repos (use `ask_user` to confirm version per group) |
 
 For `all` scope, versions may differ per group:
-- Use `AskUserQuestion`: "Version for core SDKs?" / "Version for MCP bridges?" / "Version per integration?"
+- Use `ask_user`: "Version for core SDKs?" / "Version for MCP bridges?" / "Version per integration?"
 
 Display release plan:
 ```
@@ -118,7 +123,7 @@ Release Plan:
 
 ### Step 2: Pre-flight Checks (Parallel Sub-agents — One per Repo)
 
-Spawn one `Agent(subagent_type="general-purpose")` **per repo, all simultaneously**:
+Spawn one `generalist(subagent_type="general-purpose")` **per repo, all simultaneously**:
 
 **Sub-agent prompt:**
 ```
@@ -153,7 +158,7 @@ Pre-flight:
   apcore-mcp-typescript: ⚠ dirty (2 modified files)
 ```
 
-For each repo with issues, use `AskUserQuestion` to resolve:
+For each repo with issues, use `ask_user` to resolve:
 - Dirty repo: "Stash changes" / "Skip this repo" / "Abort"
 - Wrong branch: "Continue on {branch}" / "Switch to main" / "Abort"
 - Version not < target: "Force version update" / "Skip this repo" / "Abort"
@@ -225,16 +230,16 @@ Sync report: release-sync-{version}.md
   Deep-chain tier divergences (A-D-*): {N} critical / {N} warning / {N} inconclusive
 ```
 
-**Decision rule:** defined canonically in `./references/shared/scoring.md` §Release Gate Thresholds. Apply the 5-rule first-match precedence from that file verbatim (note: rule 3 is a hard block on any D11 critical regardless of score). If `./references/shared/scoring.md` thresholds change, the release gate behavior changes — do not duplicate the numbers here.
+**Decision rule:** defined canonically in `shared/scoring.md` §Release Gate Thresholds. Apply the 5-rule first-match precedence from that file verbatim (note: rule 3 is a hard block on any D11 critical regardless of score). If `shared/scoring.md` thresholds change, the release gate behavior changes — do not duplicate the numbers here.
 
-**When BLOCKED** (normal run), display the top 5 findings by severity (cite the finding IDs from the saved reports) and use `AskUserQuestion`:
+**When BLOCKED** (normal run), display the top 5 findings by severity (cite the finding IDs from the saved reports) and use `ask_user`:
 - "Run /code-forge:fix --review on the audit + sync reports" — delegates fix-up; after fixes complete, user re-invokes `/apcore-skills:release`
 - "Abort release" — stop; no mutations have been made yet
-- "Override and continue (requires rationale)" — `AskUserQuestion` follow-up: "Provide rationale for shipping with known critical findings" (free-form text); append the rationale to `{ecosystem_root}/release-overrides-{version}.md` with timestamp, user identity (run `git -C {primary_release_repo} config user.email` where `primary_release_repo` is the first repo in the release scope; fall back to `whoami` + hostname if that is empty), and the list of unfixed finding IDs. Only then continue to Step 3.
+- "Override and continue (requires rationale)" — `ask_user` follow-up: "Provide rationale for shipping with known critical findings" (free-form text); append the rationale to `{ecosystem_root}/release-overrides-{version}.md` with timestamp, user identity (run `git -C {primary_release_repo} config user.email` where `primary_release_repo` is the first repo in the release scope; fall back to `whoami` + hostname if that is empty), and the list of unfixed finding IDs. Only then continue to Step 3.
 
 **When BLOCKED (dry-run),** display the findings with `[DRY-RUN]` prefix and stop. No override option is offered (nothing to override — no mutation is pending). User fixes and re-runs.
 
-**When WARN (medium D10 score)**, display summary and ask `AskUserQuestion`: "Continue release?" → continue | "Run fix first" | "Abort".
+**When WARN (medium D10 score)**, display summary and ask `ask_user`: "Continue release?" → continue | "Run fix first" | "Abort".
 
 **Findings captured by the gate are passed forward** to Step 4 (CHANGELOG) — any critical finding marked "contract tier divergence" indicates a Contract-level semantic change that SHOULD appear in CHANGELOG's `### Breaking` section regardless of commit prefix. Step 4 reads the sync report to enrich classification.
 
@@ -242,7 +247,7 @@ Sync report: release-sync-{version}.md
 
 ### Step 3: Version Bump (Parallel Sub-agents — All Repos Simultaneously)
 
-Spawn one `Agent(subagent_type="general-purpose")` **per repo, all simultaneously in a single round of parallel Agent calls**:
+Spawn one `generalist(subagent_type="general-purpose")` **per repo, all simultaneously in a single round of parallel generalist calls**:
 
 **Sub-agent prompt:**
 ```
@@ -317,13 +322,13 @@ Version bump:
 
 ### Step 4: CHANGELOG Generation (Parallel Sub-agents — All Repos Simultaneously)
 
-Spawn one `Agent(subagent_type="general-purpose")` **per repo, all simultaneously**:
+Spawn one `generalist(subagent_type="general-purpose")` **per repo, all simultaneously**:
 
 **Sub-agent prompt:**
 ```
 Generate a CHANGELOG entry for {repo_path} version {new_version}.
 
-1. Read the current CHANGELOG.md
+1. read_file the current CHANGELOG.md
 2. Run: git -C {repo_path} log --oneline {last_tag}..HEAD
    (If no tags exist, use the last 50 commits)
 3. Categorize commits into:
@@ -334,10 +339,10 @@ Generate a CHANGELOG entry for {repo_path} version {new_version}.
    - **Documentation** — doc changes (docs:)
    - **Other** — everything else (chore:, ci:, test:)
 
-   **Augment classification from Step 2.5 gate findings.** Read `{ecosystem_root}/release-sync-{version}.md`. For every finding in sync Phase A (signature change) or sync Step 4B (Contract tier — inputs/errors/side-effects/return/properties divergence from prior version), cross-reference the commit that introduced it (via `git log -S`). Any such commit MUST land in the `### Breaking` section even if its prefix was `fix:` or `refactor:`. Emit a note under the entry: `Breaking (contract): {finding summary} — was classified as {prefix} in commit history`.
+   **Augment classification from Step 2.5 gate findings.** read_file `{ecosystem_root}/release-sync-{version}.md`. For every finding in sync Phase A (signature change) or sync Step 4B (Contract tier — inputs/errors/side-effects/return/properties divergence from prior version), cross-reference the commit that introduced it (via `git log -S`). Any such commit MUST land in the `### Breaking` section even if its prefix was `fix:` or `refactor:`. Emit a note under the entry: `Breaking (contract): {finding summary} — was classified as {prefix} in commit history`.
 
    Also include any A-001 / A-C-{seq} / B-001 finding IDs referenced in the commits. The finding ID + a one-line description goes into the CHANGELOG entry so downstream consumers can trace.
-4. Write the new entry at the top of CHANGELOG.md, after any existing header:
+4. write_file the new entry at the top of CHANGELOG.md, after any existing header:
 
 ## [{new_version}] - {YYYY-MM-DD}
 
@@ -383,7 +388,7 @@ Display preview of each CHANGELOG entry for user review.
 
 **Skip condition:** If `--scope integrations` (only integration repos in this release, no core SDKs or MCP bridges), skip this step entirely and note: "Dependency versions unchanged — core SDKs/MCP bridges not part of this release."
 
-For integration repos that depend on core SDKs or MCP bridges being released, spawn one `Agent(subagent_type="general-purpose")` **per integration repo, all simultaneously**:
+For integration repos that depend on core SDKs or MCP bridges being released, spawn one `generalist(subagent_type="general-purpose")` **per integration repo, all simultaneously**:
 
 **Sub-agent prompt:**
 ```
@@ -391,7 +396,7 @@ Update apcore dependency versions in {repo_path}.
 
 The core SDK version has been bumped to {new_version}.
 
-1. Read the build config (pyproject.toml or package.json)
+1. read_file the build config (pyproject.toml or package.json)
 2. Find all references to apcore packages in dependencies:
    - Python: [project] dependencies, [project.optional-dependencies]
    - TypeScript: dependencies, peerDependencies, devDependencies
@@ -423,7 +428,7 @@ Dependency updates:
 
 ### Step 6: Test Verification (Parallel Sub-agents — All Repos Simultaneously)
 
-Spawn one `Agent(subagent_type="general-purpose")` **per repo, all simultaneously**:
+Spawn one `generalist(subagent_type="general-purpose")` **per repo, all simultaneously**:
 
 **Sub-agent prompt:**
 ```
@@ -479,7 +484,7 @@ Test verification:
 
 If any repo's unit tests fail OR any conformance case diverges:
 - Display failure / divergence details
-- Use `AskUserQuestion`: "How to proceed?"
+- Use `ask_user`: "How to proceed?"
   - "Fix and retry" — investigate failures (route conformance divergences to `/code-forge:fix --review` consuming the tester report)
   - "Skip this repo" — exclude from release (NOT available for conformance divergences — divergence means a lie about cross-language equivalence, cannot be skipped per-repo)
   - "Abort release" — stop everything, revert version bumps:
@@ -530,7 +535,7 @@ Dependency updates: {count}
 All changes committed locally. Nothing has been pushed.
 ```
 
-Use `AskUserQuestion`:
+Use `ask_user`:
 - "Review changes first" — show `git diff HEAD~1` for each repo
 - "Push all repos" → Step 9
 - "Push selected repos" → Step 9 with selection
@@ -548,7 +553,7 @@ cd {repo_path} && git push origin {branch} && git tag v{new_version} && git push
 
 **Error handling:** If push fails for any repo:
 - Display the error message (auth failure, rejected push, network error)
-- Use `AskUserQuestion`: "Push failed for {repo}."
+- Use `ask_user`: "Push failed for {repo}."
   - "Retry" — attempt push again
   - "Skip this repo" — continue with remaining repos
   - "Abort remaining pushes" — stop, display which repos were pushed and which were not

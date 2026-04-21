@@ -10,13 +10,13 @@ description: >
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0 (Configuration), then Step 0.5 (Project Analysis), then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0 (Configuration), then Step 0.5 (Project Analysis), then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual planning", "回退到手动 plan", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `AskUserQuestion` if a step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `ask_user` if a step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -113,7 +113,7 @@ If `reference_docs.sources` is empty or not configured, skip directly to Step 2.
 3. Auto-exclude `{output_dir}/**` to prevent circular references
 4. Deduplicate results (same file matched by multiple patterns)
 5. If 0 files matched → display: `Reference docs: 0 files matched for configured patterns. Continuing without reference context.` → skip to Step 2
-6. If > 30 files matched → display file list, use `AskUserQuestion`: "Found {N} reference docs. This will spawn {N} parallel sub-agents."
+6. If > 30 files matched → display file list, use `ask_user`: "Found {N} reference docs. This will spawn {N} parallel sub-agents."
    - "Proceed with all {N} files"
    - "Let me refine the patterns" → show current `sources`/`exclude` config, stop and let user update `.code-forge.json`
 
@@ -181,7 +181,7 @@ If the input starts with `@`, skip directly to Step 3.
 - Ends with `.md` (e.g., `user-auth.md`)
 - Matches an existing file or directory on disk
 
-**Action:** Do NOT silently proceed as prompt mode. Instead, use `AskUserQuestion`:
+**Action:** Do NOT silently proceed as prompt mode. Instead, use `ask_user`:
 
 ```
 Your input looks like a file/directory path: "{input}"
@@ -202,7 +202,7 @@ When a user provides a text prompt instead of a file path, code-forge:plan deleg
 
 Convert the prompt text to a kebab-case slug for the feature name:
 - ASCII text: lowercase, replace spaces/special chars with hyphens (e.g., "User Login Feature" → `user-login-feature`)
-- Non-ASCII text (Chinese, Japanese, etc.): use `AskUserQuestion` to let user confirm or provide a custom slug. Suggest a reasonable English slug based on the prompt meaning.
+- Non-ASCII text (Chinese, Japanese, etc.): use `ask_user` to let user confirm or provide a custom slug. Suggest a reasonable English slug based on the prompt meaning.
 
 #### 2.2 Check for Existing Feature Spec
 
@@ -271,7 +271,7 @@ If the `@` path resolves to a **directory** (not a file):
 2. Exclude non-feature files from results: filter out `overview.md`, `README.md`, `index.md`, and any file that is clearly not a feature spec (e.g., changelog, license)
 3. If no `.md` files found: display error `"No feature specs found in {path}"` with the paths tried, then stop
 4. If exactly 1 file found: use it directly (skip selection)
-5. If multiple files found: display list and use `AskUserQuestion` to let user select:
+5. If multiple files found: display list and use `ask_user` to let user select:
    ```
    Feature specs found in {path}:
      1. acl-system
@@ -323,7 +323,7 @@ On any error: display the issue, suggest a fix, and stop.
 
 Check whether `<output_dir>/<feature_name>/` already exists:
 
-- **Has `state.json`** → **Resume mode**: show progress summary (task statuses), ask via `AskUserQuestion`:
+- **Has `state.json`** → **Resume mode**: show progress summary (task statuses), ask via `ask_user`:
   - Continue (recommended) — resume from current progress
   - Restart — delete all files and regenerate
   - View plan — open plan.md
@@ -451,7 +451,7 @@ Pass `reuse_report` into the Step 7 and Step 8 sub-agent prompts as a section ti
 
 ### Step 5: Ask for Additional Information
 
-If not clearly specified in the document, use a **single** `AskUserQuestion` combining up to 3 questions. Skip any question already answered by the document:
+If not clearly specified in the document, use a **single** `ask_user` combining up to 3 questions. Skip any question already answered by the document:
 
 **Question 1: Technology Stack Confirmation**
 - "Use {extracted_tech} mentioned in document"

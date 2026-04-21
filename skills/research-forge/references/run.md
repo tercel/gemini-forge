@@ -1,7 +1,7 @@
 ---
 description: "Project due diligence — auto-chain full analysis pipeline (default: current directory)."
 argument-hint: "[target] [--lang zh|en] [--output path] [--focus dimension]"
-allowed-tools: [Read, Glob, Grep, Write, Bash, WebFetch, WebSearch, Agent, AskUserQuestion]
+allowed-tools: [Read, Glob, Grep, Write, Bash, WebFetch, WebSearch, Agent, ask_user]
 ---
 
 The user invoked `/research-forge:run` with: $ARGUMENTS

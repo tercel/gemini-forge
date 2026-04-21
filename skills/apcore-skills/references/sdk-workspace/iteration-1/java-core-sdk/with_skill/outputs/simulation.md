@@ -418,7 +418,7 @@ total_count: 72
 
 ## Step 3: Confirm Tech Stack (Questions for User)
 
-The skill would present the following interactive questions via `AskUserQuestion`:
+The skill would present the following interactive questions via `ask_user`:
 
 ```
 Java SDK Tech Stack Configuration

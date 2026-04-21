@@ -274,7 +274,7 @@ Dispatches multiple sub-agents to work on independent problems simultaneously.
 1. Lists all problems/tasks to parallelize
 2. Assesses independence (shared files, data dependencies, execution order)
 3. Builds agent prompts with explicit scope boundaries
-4. Dispatches up to 5 agents concurrently via Task tool
+4. Dispatches up to 5 agents concurrently via generalist tool
 5. Collects results, resolves conflicts, integrates
 
 **Independence rule:** Only truly independent tasks run in parallel. If tasks share files or have data dependencies, they run sequentially.

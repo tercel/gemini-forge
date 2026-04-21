@@ -11,13 +11,13 @@ description: >
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 1, perform it, then Step 2, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 1, perform it, then Step 2, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual implementation", "回退到手动 implement", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to Step 1 of the Detailed Steps and start executing.
 
-The first user-visible action of this skill should be either (a) the output of Step 1 / Step 2 of the workflow, or (b) an `AskUserQuestion` if Step 1 needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of Step 1 / Step 2 of the workflow, or (b) an `ask_user` if Step 1 needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -104,7 +104,7 @@ If no feature name is provided:
 2. Filter to features with `status` = `"pending"` or `"in_progress"` (exclude `"completed"`)
 3. If none found: "No features ready for execution. Run `/code-forge:plan` to create one."
 4. If one found: use it automatically
-5. If multiple found: display table (mark tmp features with `[tmp]` suffix) and use `AskUserQuestion` to let user select
+5. If multiple found: display table (mark tmp features with `[tmp]` suffix) and use `ask_user` to let user select
 
 #### 1.3 Validate Feature State
 
@@ -119,7 +119,7 @@ After locating the feature:
 
 ### Step 2: Ask for Execution Method
 
-Use `AskUserQuestion`:
+Use `ask_user`:
 
 - **"Start Execution Now (Recommended)"** — execute tasks one by one, auto-track progress → enter Step 3
 - **"Manual Execution Later"** — save plan, show resume instructions (`/code-forge:impl {feature}`)
@@ -139,7 +139,7 @@ Use `AskUserQuestion`:
 5. Update task status to `"in_progress"` in `state.json`
 6. **Dispatch sub-agent** for this task (see 3.2)
 7. Review the sub-agent's execution summary
-8. Ask user via `AskUserQuestion`: "Is the task completed?"
+8. Ask user via `ask_user`: "Is the task completed?"
    - **"Completed, continue to next"** → update status to `"completed"`, continue loop
    - **"Encountered issue, pause"** → keep `"in_progress"`, exit loop
    - **"Skip this task"** → update status to `"skipped"`, continue loop

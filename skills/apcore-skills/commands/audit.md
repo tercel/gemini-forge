@@ -1,20 +1,25 @@
 ---
-description: "Deep cross-repo consistency audit for the apcore ecosystem. Checks API surface alignment, naming conventions, version synchronization, documentation quality, test coverage, dependency alignment, and configuration consistency across all repos. Generates a detailed report with severity-classified findings."
-argument-hint: "[--scope core|mcp|integrations|all] [--fix] [--no-deep-chain] [--save report.md]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: Deep cross-repo consistency audit for the apcore ecosystem. Checks API
+  surface alignment, naming conventions, version synchronization, documentation quality,
+  test coverage, dependency alignment, and configuration consistency across all repos.
+  Generates a detailed report with severity-classified findings.
+argument-hint: /apcore-skills:audit [--scope core|mcp|integrations|all] [--fix] [--no-deep-chain]
+  [--save report.md]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Apcore Skills — Audit
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0 (Ecosystem Discovery), then Step 1 (Parse Arguments), then Step 2 (Execute Audit Dimensions), etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file Step 0 (Ecosystem Discovery), then Step 1 (Parse Arguments), then Step 2 (Execute Audit Dimensions), etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual audit", "回退到手动 audit", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to Step 0 and start executing.
 
-The first user-visible action of this skill should be either (a) the output of Step 0 / Step 1, or (b) an `AskUserQuestion` if scope detection needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of Step 0 / Step 1, or (b) an `ask_user` if scope detection needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -22,7 +27,7 @@ Comprehensive consistency audit across all apcore ecosystem repositories.
 
 ## Iron Law
 
-**AUDIT EVERY DIMENSION. CLASSIFY EVERY FINDING. A partial audit creates false confidence.**
+**APPLY EVERY APPLICABLE DIMENSION. EVIDENCE EVERY FINDING. A dimension returning zero findings — with a short note of what was checked — IS a valid result. Quota-filling manufactures false positives; unreachable / speculative findings are noise, not signal.**
 
 ## When to Use
 
@@ -91,7 +96,7 @@ Step 0 (ecosystem) → Step 1 (parse args) → Step 2 (parallel audits) → Step
 
 ### Step 0: Ecosystem Discovery
 
-@./references/shared/ecosystem.md
+@../references/shared/ecosystem.md
 
 ---
 
@@ -109,7 +114,7 @@ Parse `$ARGUMENTS` for flags.
    - `integration` repo → audit this repo, dimensions D2-D10. For D10, auto-pull in the relevant core SDK (matching the integration's language — e.g., django-apcore → apcore-python; nestjs-apcore → apcore-typescript) AND the `apcore/` doc repo as **read-only peers** for the Consumer Contract Check (Step 4 of the D10 prompt). Dimensions D2–D9 still apply only to the integration repo itself.
    - `protocol`/`docs-site` repo → audit documentation dimensions (D4) and bloat (D9) for this repo
    - `shared-lib`/`tooling` repo → audit D2 (naming), D4 (docs), D5 (tests), D8 (structure), D9 (bloat) for this repo
-   - CWD not an apcore repo → use `AskUserQuestion` to ask: "CWD is not an apcore repo. Which repo do you want to audit?" with options from `repos[]` names + "All repos (full ecosystem audit)"
+   - CWD not an apcore repo → use `ask_user` to ask: "CWD is not an apcore repo. Which repo do you want to audit?" with options from `repos[]` names + "All repos (full ecosystem audit)"
 3. Display: "Scope: {repo-name} (from CWD). Use --scope all for full ecosystem audit."
 
 **If `--scope` IS specified:** use explicit scope.
@@ -127,7 +132,7 @@ Parse `$ARGUMENTS` for flags.
 
 **D10 (Contract Parity) is included in two modes:**
 1. **Parity mode** — runs whenever ≥2 same-type repos are in scope (e.g., multiple core SDKs, multiple MCP bridges). Detects intent divergence across language implementations — the bug class where public signatures match but logic/purpose differs (e.g., one SDK validates inputs and the other doesn't; one emits an event and the other doesn't; one is thread-safe and the other isn't).
-2. **Consumer Contract mode** — runs whenever at least one `integration` repo is in scope. The audit auto-pulls the matching core SDK (by language) and the `apcore/` doc repo as read-only peers, then verifies each integration uses the core SDK per its current Contract (input completeness, error handling, thread-safety assumption, deprecated API usage). See `./references/audit/references/dimension-prompts.md` D10 Step 4.
+2. **Consumer Contract mode** — runs whenever at least one `integration` repo is in scope. The audit auto-pulls the matching core SDK (by language) and the `apcore/` doc repo as read-only peers, then verifies each integration uses the core SDK per its current Contract (input completeness, error handling, thread-safety assumption, deprecated API usage). See `references/dimension-prompts.md` D10 Step 4.
 
 Both modes can run in the same audit invocation — a `--scope all` run exercises both. When the current scope has only 1 same-type repo AND no integrations, D10 is skipped with an INFO finding.
 
@@ -149,7 +154,7 @@ Dimensions: {list}
 
 Spawn **all dimension sub-agents in parallel**. Dimensions D1–D10 each run as one parallel sub-agent (up to 10 simultaneously). **D11 runs as a delegated invocation of `sync` Step 4C** (see Step 2.D11 below) — the delegation itself is one sub-agent from the audit orchestrator's POV, which internally fans out to module-level sub-agents. All dimensions are fully independent.
 
-**Sub-agent prompts:** Use the dimension-specific prompt templates from `./references/audit/references/dimension-prompts.md`. Each dimension (D1–D10) has its own section with the full prompt template. Fill in `{repo_paths}` (and `{integration_repo_paths}` for D7, `{doc_repo_path}` for D10) from the scope determined in Step 1.
+**Sub-agent prompts:** Use the dimension-specific prompt templates from `@references/dimension-prompts.md`. Each dimension (D1–D10) has its own section with the full prompt template. Fill in `{repo_paths}` (and `{integration_repo_paths}` for D7, `{doc_repo_path}` for D10) from the scope determined in Step 1.
 
 #### Step 2.D11: Deep-Chain Parity (delegates to sync Step 4C)
 
@@ -158,7 +163,7 @@ Spawn **all dimension sub-agents in parallel**. Dimensions D1–D10 each run as 
 - <2 impl repos in scope (after `--scope` resolution) OR scope is `integrations`-only
 - D10 Parity mode was skipped (same precondition)
 
-**Invocation.** Spawn a single `Agent(subagent_type="general-purpose")` tasked with running sync Step 4C internally. The prompt is:
+**Invocation.** Spawn a single `generalist(subagent_type="general-purpose")` tasked with running sync Step 4C internally. The prompt is:
 
 ```
 Run /apcore-skills:sync {impl_repo_1},{impl_repo_2},...,{doc_repo} --phase a --internal-check=contract --deep-chain=on --save {ecosystem_root}/audit-d11-{YYYY-MM-DD}.md
@@ -304,12 +309,12 @@ Repos audited: {count}
   Dependencies: {score}/100
   Leanness (D9):     {score}/100
   Contract Parity (D10): {score}/100
-  Deep-Chain Parity (D11): {score}/100 — see references/shared/scoring.md for formula
+  Deep-Chain Parity (D11): {score}/100 — see shared/scoring.md for formula
 ```
 
-**Score formulas:** Leanness (D9) and Contract Parity (D10) formulas are defined canonically in `references/shared/scoring.md`. Use those formulas — do not re-implement. Any threshold change (e.g., release-gate BLOCK threshold) must be updated there, not inline here.
+**Score formulas:** Leanness (D9) and Contract Parity (D10) formulas are defined canonically in `shared/scoring.md`. Use those formulas — do not re-implement. Any threshold change (e.g., release-gate BLOCK threshold) must be updated there, not inline here.
 
-If `--save` flag is passed with an explicit path, write to that path. If `--save` is passed without a path, write to the canonical default from `references/shared/ecosystem.md` §0.6a: `{ecosystem_root}/audit-report-{YYYY-MM-DD}.md`.
+If `--save` flag is passed with an explicit path, write to that path. If `--save` is passed without a path, write to the canonical default from `shared/ecosystem.md` §0.6a: `{ecosystem_root}/audit-report-{YYYY-MM-DD}.md`.
 
 ---
 
@@ -372,7 +377,7 @@ Use the `# Project Review:` header with a dynamic scope description (derived fro
 - The `file` field MUST point to the **implementation or doc file that needs changing**. For D10 cross-repo findings where spec is silent, the `file` is the implementation file of the **outlier repo** (the one that diverges from the majority or from the most-reference repo `apcore-python`). For spec-authoritative D10 findings, every non-matching repo emits its own issue entry (one per repo).
 - The `suggestion` field MUST be concrete — e.g., "Add `if not RE_ID.match(id): raise InvalidIdError(code=INVALID_ID)` at line {L}, before the existing `self._index[id] = module` assignment" rather than "fix validation".
 - For D10 intent divergences, include the correct contract row from `spec_contracts` (or from the non-outlier repo, if spec silent) directly in the suggestion.
-- For D4 spec-contract-missing findings, the `file` is the feature spec that needs the `## Contract:` block added; the `suggestion` includes a ready-to-paste Contract skeleton using `references/shared/contract-spec.md` format.
+- For D4 spec-contract-missing findings, the `file` is the feature spec that needs the `## Contract:` block added; the `suggestion` includes a ready-to-paste Contract skeleton using `shared/contract-spec.md` format.
 
 **Example output:**
 
@@ -400,7 +405,7 @@ Use the `# Project Review:` header with a dynamic scope description (derived fro
   line: 1
   title: [D4-007] Spec — Config.load missing ## Contract: block
   description: Feature spec declares Config.load as a public method but has no `## Contract:` block. Intent parity across language SDKs cannot be verified against spec — D10 fell back to cross-repo-only mode for this method.
-  suggestion: Add a Contract block per references/shared/contract-spec.md. Template:
+  suggestion: Add a Contract block per shared/contract-spec.md. Template:
     ```
     ## Contract: Config.load
     ### Inputs
@@ -441,9 +446,9 @@ Group fixable findings by repo. Separate unfixable findings for reporting.
 
 **Fixable (per-repo parallel sub-agents):**
 
-Spawn one `Agent(subagent_type="general-purpose")` **per repo that has fixable findings, all in parallel**.
+Spawn one `generalist(subagent_type="general-purpose")` **per repo that has fixable findings, all in parallel**.
 
-**Sub-agent prompt:** Use the template from `./references/audit/references/fix-prompt.md`, filling in `{repo_path}` and injecting the fixable findings for that repo from Step 3.
+**Sub-agent prompt:** Use the template from `@references/fix-prompt.md`, filling in `{repo_path}` and injecting the fixable findings for that repo from Step 3.
 
 Wait for all repo fix sub-agents to complete.
 

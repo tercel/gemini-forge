@@ -47,7 +47,7 @@ Parse the arguments to determine what to analyze:
 2. If no path, use the current working directory's `docs/` directory
 3. If multiple paths are provided, analyze all of them as one collection
 
-Use `AskUserQuestion` to understand the user's goals:
+Use `ask_user` to understand the user's goals:
 - **What is this collection?** (e.g., "ecosystem docs for multiple products", "research notes", "mixed specs and decisions")
 - **What do you want to understand?** Options:
   - Full landscape analysis (recommended for first time)
@@ -375,7 +375,7 @@ Analysis complete: {collection-name}
     3. {action} — {impact}
 ```
 
-Use `AskUserQuestion` to ask what to do next:
+Use `ask_user` to ask what to do next:
 - **Deep dive**: Explore a specific theme or conflict in detail
 - **Fix conflicts**: Help resolve specific contradictions
 - **Fill gaps**: Generate missing documents using spec-forge skills

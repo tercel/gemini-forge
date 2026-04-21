@@ -1,7 +1,7 @@
 ---
 description: "Full due diligence — deep analysis across all three dimensions."
 argument-hint: "<target> [--lang zh|en] [--focus business|technical|investment]"
-allowed-tools: [Read, Glob, Grep, Write, Bash, WebFetch, WebSearch, Agent, AskUserQuestion]
+allowed-tools: [Read, Glob, Grep, Write, Bash, WebFetch, WebSearch, Agent, ask_user]
 ---
 
 The user invoked this command with: $ARGUMENTS

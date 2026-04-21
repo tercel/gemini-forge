@@ -1,20 +1,23 @@
 ---
-description: "Finalize feature development — verifies tests, performs simplification gate, manages merge/PR, and cleans up worktrees"
-argument-hint: "[feature-name]"
-allowed-tools: [Read, Glob, Grep, Bash, AskUserQuestion, Task, Agent]
+description: "Use when implementation is complete and you need to merge, create a\
+  \ PR, or clean up \u2014 verifies tests pass, presents 4 structured integration\
+  \ options, executes chosen workflow, and cleans up worktrees. Pairs with code-forge:worktree."
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Finish
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 1 (Verify Tests), perform it, then Step 1.5 (Simplification Gate), then Step 2, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file Step 1 (Verify Tests), perform it, then Step 1.5 (Simplification Gate), then Step 2, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual finish", "回退到手动 finish", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to Step 1 and start executing.
 
-The first user-visible action of this skill should be either (a) the output of Step 1 / Step 1.5 of the workflow, or (b) an `AskUserQuestion` if a step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of Step 1 / Step 1.5 of the workflow, or (b) an `ask_user` if a step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -70,7 +73,7 @@ If the changed file list is empty (nothing to merge), skip the gate and proceed 
 git status --porcelain > /tmp/code-forge-finish-pre-gate-status.txt
 ```
 
-If `/tmp/code-forge-finish-pre-gate-status.txt` is non-empty (the user already has uncommitted work before the gate runs), display a warning and use `AskUserQuestion`:
+If `/tmp/code-forge-finish-pre-gate-status.txt` is non-empty (the user already has uncommitted work before the gate runs), display a warning and use `ask_user`:
 - "Stash them and run the gate" → run `git stash push -u -m "code-forge-finish-pre-gate"`, then proceed; pop the stash before exiting Step 1.5
 - "Commit them first, then run the gate" → STOP, let the user commit, ask the user to re-run `/code-forge:finish`
 - "Proceed without stashing (risky — gate fixes will mix with your changes)" → proceed; the cleanup logic in 1.5.3 will then refuse the destructive options and only allow "review and decide manually"
@@ -79,7 +82,7 @@ If `/tmp/code-forge-finish-pre-gate-status.txt` is non-empty (the user already h
 
 **Offload to a sub-agent** so the full diff, grep output, and file reads stay out of the main context.
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Pre-merge simplification gate"`
 
@@ -102,7 +105,7 @@ classify it and decide whether you can fix it automatically or whether it needs 
 judgment.
 
 (a) DUPLICATE — code in this diff that reimplements something already present elsewhere
-    in the project. Before flagging, run `Grep` for similar names, similar signatures,
+    in the project. Before flagging, run `grep_search` for similar names, similar signatures,
     and similar string literals across the project. If a near-equivalent exists, the
     new code is a duplicate.
     Auto-fix: replace callers of the new symbol with the existing symbol, then delete
@@ -110,7 +113,7 @@ judgment.
     equivalent — otherwise leave for human.
 
 (b) DEAD_CODE — new symbols (functions, classes, types, constants, exports) defined in
-    the diff that have zero callers anywhere in the project. Use `Grep` across the
+    the diff that have zero callers anywhere in the project. Use `grep_search` across the
     full project (not just CHANGED_FILES) to verify there are no external callers.
     Auto-fix: delete the symbol and any tests that exist solely for it.
 
@@ -218,21 +221,21 @@ NET_LOC_DELTA: {original loc_added minus lines removed by gate fixes}
 
 #### 1.5.4 Decision
 
-Read the report from the sub-agent and act. **The set of files the sub-agent touched comes ONLY from `FIXES_APPLIED.file` in the report — never from `git status`, never from a wildcard.** This isolation is what makes the gate safe to run on a working tree that may also contain unrelated user changes.
+read_file the report from the sub-agent and act. **The set of files the sub-agent touched comes ONLY from `FIXES_APPLIED.file` in the report — never from `git status`, never from a wildcard.** This isolation is what makes the gate safe to run on a working tree that may also contain unrelated user changes.
 
 Build `GATE_FILES` = the deduplicated list of file paths from `FIXES_APPLIED.file`.
 
 - **No findings, no fixes applied (`FIXES_APPLIED` is empty):** Display `Simplification gate: clean. No bloat detected.` If we stashed in 1.5.2, `git stash pop`. Proceed to Step 2.
 
-- **Fixes applied, all tests still pass:** Display the `FIXES_APPLIED` list and the new `NET_LOC_DELTA`. Use `AskUserQuestion` to ask:
+- **Fixes applied, all tests still pass:** Display the `FIXES_APPLIED` list and the new `NET_LOC_DELTA`. Use `ask_user` to ask:
   - **"Review the simplification changes"** → run `git diff -- $GATE_FILES` (only the gate files), display the summary, then re-ask the same question.
   - **"Commit the simplifications, then proceed to merge options"** → stage ONLY the gate files explicitly: `git add -- $GATE_FILES`. Then commit: `git commit -m "chore: pre-merge simplification gate"`. If the gate was preceded by a stash (1.5.2), `git stash pop` AFTER the commit so the user's prior work returns to the working tree unmixed with the gate commit. Proceed to Step 2.
-  - **"Discard the simplifications and proceed anyway"** → use `AskUserQuestion` to confirm with a separate "Yes, discard" / "Cancel" choice. On confirmation, revert ONLY the gate files: `git checkout HEAD -- $GATE_FILES`. **Never** run `git checkout -- .` or `git reset --hard` — those would destroy unrelated user changes. If we stashed in 1.5.2, `git stash pop`. Proceed to Step 2.
+  - **"Discard the simplifications and proceed anyway"** → use `ask_user` to confirm with a separate "Yes, discard" / "Cancel" choice. On confirmation, revert ONLY the gate files: `git checkout HEAD -- $GATE_FILES`. **Never** run `git checkout -- .` or `git reset --hard` — those would destroy unrelated user changes. If we stashed in 1.5.2, `git stash pop`. Proceed to Step 2.
   - **If the user chose "Proceed without stashing" in 1.5.2**: omit the "Discard the simplifications" option entirely — the working tree contains mixed changes and a surgical revert is unsafe without the user picking files manually. Only offer "Review", "Commit", and "Stop and resolve manually".
 
 - **Tests broke after fixes (sub-agent should have already reverted the offending fix):** Display the failing test name, the reverted fix, and the remaining `FIXES_APPLIED` entries. **STOP.** Do not proceed to Step 2. The user must verify the working tree manually and re-run `/code-forge:finish`.
 
-- **`REMAINING_ISSUES` is non-empty (unfixable bloat that needs human judgment):** Display them with `file:line` references. Use `AskUserQuestion`:
+- **`REMAINING_ISSUES` is non-empty (unfixable bloat that needs human judgment):** Display them with `file:line` references. Use `ask_user`:
   - "Address remaining issues now (recommended)" → STOP. If we stashed in 1.5.2, leave the stash in place and tell the user the stash name so they can pop it after resolving.
   - "Proceed to merge options anyway (issues will land in main)" → continue with the "Fixes applied" flow above for any fixes the gate did apply, then proceed to Step 2 with a warning.
 
@@ -247,7 +250,7 @@ BASE_BRANCH=$(git rev-parse --abbrev-ref --symbolic-full-name @{u} 2>/dev/null |
 
 ### Step 3: Present Exactly 4 Options
 
-Present these options to the user using `AskUserQuestion`. Do NOT modify, add, or remove options:
+Present these options to the user using `ask_user`. Do NOT modify, add, or remove options:
 
 **Option 1: Merge back to {base-branch} locally**
 - `git checkout {base-branch} && git merge {feature-branch}`

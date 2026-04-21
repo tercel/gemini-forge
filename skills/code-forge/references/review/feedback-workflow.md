@@ -10,7 +10,7 @@ Evaluate and respond to incoming code review feedback with technical rigor.
 
 **NO BLIND IMPLEMENTATION. EVALUATE BEFORE ACTING.**
 
-Read → Understand → Verify → Evaluate → Respond → Implement (if warranted).
+read_file → Understand → Verify → Evaluate → Respond → Implement (if warranted).
 
 ## Step 1: Collect Feedback
 
@@ -49,7 +49,7 @@ For EACH feedback item, assess independently:
 ### 2.2 Verify Technically
 
 **Check if the suggestion is correct for THIS codebase:**
-- Read the referenced file and surrounding code
+- read_file the referenced file and surrounding code
 - Check if the described problem actually exists
 - Check if the suggested fix would work in this context
 - Check for side effects the reviewer may not have considered

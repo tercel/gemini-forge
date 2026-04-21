@@ -1,7 +1,9 @@
 ---
 description: "Use when you want end-to-end implementation from feature spec or prompt to working code — auto-chains test-cases → plan → impl → review → verify. Works with or without existing documentation."
 argument-hint: "[@docs/features/feature.md | feature-name | \"add CSV export to users\"]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
 
 You are the code-forge build orchestrator. Your job is to take a feature from idea to working, tested code in one flow. Supports both documented projects (with feature specs) and undocumented projects (with just a prompt).
@@ -133,7 +135,7 @@ Check if `docs/{feature_slug}/test-cases.md` already exists:
 - **If exists**: Read it, display summary ("Found existing test-cases.md with {N} cases"), ask: "Use existing? Regenerate? Skip test cases?"
 - **If not exists**: Generate test cases
 
-Launch `Task(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 ```
 Invoke the spec-forge:test-cases skill for '{feature_name}'.
 Skip project scanning — use the pre-scanned context below.
@@ -160,7 +162,7 @@ Ask: "Review the test cases before proceeding? (Y/n)"
 
 ### Step 2.5: TDD Implementation (Test Mode only)
 
-Launch `Task(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 ```
 Invoke the code-forge:tdd skill in driven mode.
 Input: @docs/{feature_slug}/test-cases.md
@@ -180,7 +182,7 @@ Check if `planning/{feature_slug}/state.json` already exists:
 - **If exists and has pending tasks**: Ask "Resume existing plan? Regenerate?"
 - **If not exists**: Generate plan
 
-Launch `Task(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 ```
 Invoke the code-forge:plan skill for '{feature_name}'.
 Input: @{feature_spec_path}
@@ -203,7 +205,7 @@ Ask: "Review the plan before implementing? (Y/n)"
 
 ## Step 4: Implementation
 
-Launch `Task(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 ```
 Invoke the code-forge:impl skill for '{feature_name}'.
 Skip project scanning — use the pre-scanned context below.
@@ -221,7 +223,7 @@ Wait for completion. Display:
 
 ## Step 5: Review
 
-Launch `Task(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 ```
 Invoke the code-forge:review skill for '{feature_name}'.
 Skip project scanning — use the pre-scanned context below.
@@ -244,7 +246,7 @@ If issues found at blocker/critical severity:
 
 ## Step 6: Verify
 
-Launch `Task(subagent_type="general-purpose")`:
+Launch `generalist(subagent_type="general-purpose")`:
 ```
 Invoke the code-forge:verify skill.
 Run the full test suite and verify all tests pass.

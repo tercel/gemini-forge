@@ -45,7 +45,7 @@ Parse the arguments to determine what to audit:
 
 If no documentation found, inform the user and stop.
 
-Use `AskUserQuestion` to ask:
+Use `ask_user` to ask:
 - **Audit focus**: Full audit, or focus on a specific area? (Options: Full / API docs only / Feature docs only / Architecture docs only / Custom path)
 - **Code alignment**: Should I cross-reference docs against the codebase? (Yes / No — skip if docs-only repo like aipartnerup-docs)
 
@@ -248,7 +248,7 @@ Audit complete: {project-name}
     3. {action} — {severity} — {effort}
 ```
 
-Use `AskUserQuestion` to ask:
+Use `ask_user` to ask:
 - **Fix mode**: Would you like me to fix any of these issues now?
   - Fix critical findings
   - Fix all findings (critical + major + minor)

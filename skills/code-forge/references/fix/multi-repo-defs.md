@@ -19,7 +19,7 @@ Fix this bug in the repository: '{bug_description}'
 
 1. Scan the codebase for code related to the bug description
 2. Diagnose the root cause (1-2 sentences)
-3. Write a regression test that reproduces the bug (must fail before fix)
+3. write_file a regression test that reproduces the bug (must fail before fix)
 4. Implement the minimal fix
 5. Run the full test suite to verify no regressions
 6. Commit with message: fix: {brief description}

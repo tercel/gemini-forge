@@ -1,20 +1,23 @@
 ---
-description: "Evidence-based completion verification — run before claiming success to prevent false success claims"
-argument-hint: "[command]"
-allowed-tools: [Read, Glob, Grep, Bash, AskUserQuestion]
+description: "Use before claiming work is done, fixed, or passing \u2014 requires\
+  \ running verification commands and confirming output before any success claim.\
+  \ Prevents false completion claims, unverified assertions, and \"should work\" statements."
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Verify
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual verification", "回退到手动 verify", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -79,7 +82,7 @@ NOT: "Tests should pass now" or "I fixed the issue so tests will pass."
 
 ### Regression Test
 ```
-Write test → Run (PASS) → Revert fix → Run (MUST FAIL) → Restore fix → Run (PASS)
+write_file test → Run (PASS) → Revert fix → Run (MUST FAIL) → Restore fix → Run (PASS)
 ```
 The revert-and-fail step proves the test actually catches the bug.
 
@@ -97,9 +100,9 @@ For each requirement:
 ```
 NOT: "Tests pass, so the feature is complete."
 
-### Sub-Agent Output
+### Sub-generalist Output
 ```
-Agent claims success → Check VCS diff → Run tests yourself → Verify changes
+generalist claims success → Check VCS diff → Run tests yourself → Verify changes
 ```
 NEVER trust agent reports without independent verification.
 

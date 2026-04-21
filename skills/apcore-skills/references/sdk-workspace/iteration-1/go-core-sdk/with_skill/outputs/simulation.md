@@ -325,7 +325,7 @@ TESTS:
 
 ## Step 3: Tech Stack Questions for Go
 
-The skill specifies these questions for Go (would be presented via `AskUserQuestion`):
+The skill specifies these questions for Go (would be presented via `ask_user`):
 
 ```
 Go Tech Stack Configuration:

@@ -191,7 +191,7 @@ support: ErrorCodeRegistry (for collision detection)
 
 ---
 
-## Step 3: Confirm Tech Stack (AskUserQuestion)
+## Step 3: Confirm Tech Stack (ask_user)
 
 The skill specifies these questions for Java:
 

@@ -1,20 +1,25 @@
 ---
-description: "Use when implementing a feature — executes TDD tasks via sub-agents with state tracking and auto-resume"
-argument-hint: "[feature-name] [--repos path1 path2 ...]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: "Execute pending tasks for a feature \u2014 TDD-driven implementation\
+  \ with sub-agent isolation and progress tracking. Use when starting to build, implement,\
+  \ or code a planned feature, resuming partially completed work, or running the next\
+  \ task in a code-forge plan. Supports --repos flag for parallel implementation across\
+  \ multiple repositories."
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Impl
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 1, perform it, then Step 2, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file Step 1, perform it, then Step 2, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual implementation", "回退到手动 implement", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to Step 1 of the Detailed Steps and start executing.
 
-The first user-visible action of this skill should be either (a) the output of Step 1 / Step 2 of the workflow, or (b) an `AskUserQuestion` if Step 1 needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of Step 1 / Step 2 of the workflow, or (b) an `ask_user` if Step 1 needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -55,9 +60,9 @@ Step 3 dispatches a dedicated sub-agent for each task, so code changes from one 
 
 If `$ARGUMENTS` does **not** contain `--repos`, skip this step and continue below.
 
-If `--repos` is present: first, locate the skill installation directory by finding this SKILL.md file's parent (use `Glob` for `**/skills/impl/SKILL.md` if needed). Then dispatch `Agent(subagent_type="general-purpose", description="Impl --repos coordinator")` with prompt containing the **resolved absolute paths**:
+If `--repos` is present: first, locate the skill installation directory by finding this SKILL.md file's parent (use `glob` for `**/skills/impl/SKILL.md` if needed). Then dispatch `generalist(subagent_type="general-purpose", description="Impl --repos coordinator")` with prompt containing the **resolved absolute paths**:
 
-> Read these two files and follow them exactly:
+> read_file these two files and follow them exactly:
 > 1. `{resolved_absolute_path}/skills/shared/multi-repo.md` — the protocol steps MR-1~MR-5
 > 2. `{resolved_absolute_path}/skills/impl/multi-repo-defs.md` — the impl-specific definitions
 >
@@ -74,7 +79,7 @@ Before executing tasks, ensure the project context is understood:
 @../references/shared/project-analysis.md
 
 Execute PA.1 (Project Profile), PA.3 (Language-Specific Deep Scan for the feature's modules), and PA.5 (Existing Test Assessment). This context is passed to each task sub-agent so they:
-- Write tests using the CORRECT framework and patterns
+- write_file tests using the CORRECT framework and patterns
 - Follow the project's ACTUAL architecture (not assumed patterns)
 - Handle language-specific constructs properly (Rust lifetimes, Go error chains, etc.)
 
@@ -101,12 +106,12 @@ If no feature name is provided:
 2. Filter to features with `status` = `"pending"` or `"in_progress"` (exclude `"completed"`)
 3. If none found: "No features ready for execution. Run `/code-forge:plan` to create one."
 4. If one found: use it automatically
-5. If multiple found: display table (mark tmp features with `[tmp]` suffix) and use `AskUserQuestion` to let user select
+5. If multiple found: display table (mark tmp features with `[tmp]` suffix) and use `ask_user` to let user select
 
 #### 1.3 Validate Feature State
 
 After locating the feature:
-1. Read `state.json`
+1. read_file `state.json`
 2. Check that `tasks` array is non-empty
 3. Check that task files in `tasks/` directory exist
 4. Show feature progress summary: completed/in_progress/pending counts
@@ -116,7 +121,7 @@ After locating the feature:
 
 ### Step 2: Ask for Execution Method
 
-Use `AskUserQuestion`:
+Use `ask_user`:
 
 - **"Start Execution Now (Recommended)"** — execute tasks one by one, auto-track progress → enter Step 3
 - **"Manual Execution Later"** — save plan, show resume instructions (`/code-forge:impl {feature}`)
@@ -129,14 +134,14 @@ Use `AskUserQuestion`:
 
 #### 3.1 Coordination Loop (Main Context)
 
-1. Read `state.json`
+1. read_file `state.json`
 2. Find the next task in `execution_order` that is `"pending"` with no unmet dependencies
 3. If no such task exists: display "All tasks completed!" and exit loop
 4. Display: "Starting task: {id} - {title}"
 5. Update task status to `"in_progress"` in `state.json`
 6. **Dispatch sub-agent** for this task (see 3.2)
 7. Review the sub-agent's execution summary
-8. Ask user via `AskUserQuestion`: "Is the task completed?"
+8. Ask user via `ask_user`: "Is the task completed?"
    - **"Completed, continue to next"** → update status to `"completed"`, continue loop
    - **"Encountered issue, pause"** → keep `"in_progress"`, exit loop
    - **"Skip this task"** → update status to `"skipped"`, continue loop
@@ -144,7 +149,7 @@ Use `AskUserQuestion`:
 
 #### 3.2 Task Execution Sub-agent
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Execute task: {task_id}"`
 
@@ -164,7 +169,7 @@ Spawn an `Agent` tool call with:
 - Instruction to return ONLY a concise execution summary
 
 **Sub-agent executes:**
-1. Read the task file from disk
+1. read_file the task file from disk
 2. Follow the task steps (TDD: write tests → run tests → implement → verify)
 3. Commit changes if all tests pass (with descriptive commit message)
 
@@ -182,7 +187,7 @@ Spawn an `Agent` tool call with:
 
 #### 3.3 Parallel Execution (Optional)
 
-When multiple pending tasks have **no mutual dependencies** (none depends on another), they may be dispatched as parallel sub-agents using multiple `Agent` tool calls in a single message. Each sub-agent works in isolation on its own task.
+When multiple pending tasks have **no mutual dependencies** (none depends on another), they may be dispatched as parallel sub-agents using multiple `generalist` tool calls in a single message. Each sub-agent works in isolation on its own task.
 
 **Use parallel execution only when:**
 - Tasks modify different files (no overlap in "Files Involved")
@@ -233,3 +238,4 @@ Next steps:
   /code-forge:verify                                       Verify all tests pass
   /code-forge:finish {feature_name}                        Merge / create PR
 ```
+

@@ -1,20 +1,31 @@
 ---
-description: "Unified cross-language consistency verification and documentation alignment. Phase A: verifies feature specs match implementations. Phase B: verifies documentation internal consistency."
-argument-hint: "[repo1,repo2,...] [--phase a|b|all] [--fix] [--scope core|mcp|all] [--lang python,typescript,...] [--internal-check none|contract|skeleton|behavior] [--deep-chain on|off] [--save]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: 'Unified cross-language consistency verification and documentation alignment.
+  Phase A: verifies feature specs and protocol spec match all language implementations
+  (classes, functions, parameters, return types, trait/interface satisfaction, multi-constructor
+  patterns, and optional algorithm-skeleton checkpoints) via itemized checklist comparison.
+  Phase B: verifies all documentation (PRD, SRS, Tech Design, Test Plan, Feature Specs,
+  PROTOCOL_SPEC, README, examples, tests) is internally consistent and free of contradictions.
+  Includes cross-language example scenario coverage and test scenario coverage comparison.
+  Optionally hands off behavioral equivalence to the `tester` skill. Covers both apcore
+  core SDKs and apcore-mcp bridges.'
+argument-hint: /apcore-skills:sync [repo1,repo2,...] [--phase a|b|all] [--fix] [--scope
+  core|mcp|all] [--lang python,typescript,...] [--internal-check none|contract|skeleton|behavior]
+  [--deep-chain on|off] [--save]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Apcore Skills — Sync
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step (argument parsing / ecosystem discovery), then continue through Phase A and Phase B in order, until the workflow completes or you reach an `AskUserQuestion` checkpoint. Phase A MUST complete before Phase B begins.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step (argument parsing / ecosystem discovery), then continue through Phase A and Phase B in order, until the workflow completes or you reach an `ask_user` checkpoint. Phase A MUST complete before Phase B begins.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual sync", "回退到手动 sync", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step / Phase A startup, or (b) an `AskUserQuestion` if scope detection needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step / Phase A startup, or (b) an `ask_user` if scope detection needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -22,7 +33,7 @@ Unified consistency verification across all apcore ecosystem documentation and i
 
 ## Iron Law
 
-**DOCUMENTATION REPOS ARE THE SINGLE SOURCE OF TRUTH. Phase A verifies code matches specs. Phase B verifies docs are internally consistent. Never skip a phase. Never skip a checklist item.**
+**DOCUMENTATION REPOS ARE THE SINGLE SOURCE OF TRUTH. Phase A verifies code matches specs. Phase B verifies docs are internally consistent. Both phases run in order; every checklist item is evaluated. A checklist item passing cleanly, with evidence of what was checked, IS a valid result — the goal is correct findings, not findings-per-item.**
 
 ## Anti-Rationalization Table
 
@@ -39,12 +50,16 @@ Unified consistency verification across all apcore ecosystem documentation and i
 | "Doc examples are just illustrative" | If a code example calls a non-existent method or passes the wrong number of args, a user copying it will get a compile/runtime error. Doc examples ARE the onboarding API — treat them as code. |
 | "Deprecated APIs in docs are just stale" | If CHANGELOG says an API was removed in v0.18.0 but docs still reference it, users following the docs will hit errors on the current version. Cross-check CHANGELOG Removed sections against doc examples. |
 | "PRD is product-level, no need to check against code" | If the PRD says a feature exists but no implementation matches, that is a gap. Every layer must agree. |
-| "Internal helpers should also be 1-to-1 across languages" | NO. Function-level identity (helper names, decomposition, line count) conflicts with each language's design (Rust ownership splits, Go's no-default-args, Python list comprehensions). **BUT** intent / logic / purpose MUST be identical across languages — that is enforced by the CONTRACT tier (default ON, Step 4B), the SKELETON tier (opt-in, Step 4A — algorithm checkpoint sequence), and the BEHAVIOR level (delegated to tester). Function-level identity is explicitly NOT a goal — it conflicts with each language's design philosophy. |
+| "Internal helpers should also be 1-to-1 across languages" | NO. Function-level identity (helper names, decomposition, line count) conflicts with each language's design (Rust ownership splits, Go's no-default-args, Python list comprehensions). **BUT** intent / logic / purpose MUST be identical across languages — that is enforced by the CONTRACT tier (default ON, Step 4B), the SKELETON tier (opt-in, Step 4A — algorithm checkpoint sequence), and the BEHAVIOR tier (opt-in, Step 7.5 — runtime equivalence via `tester`). Helper-name parity is never enforced at any tier. |
 | "Same public signature means same intent" | NO. Two `register(id, module)` methods can share the same signature yet diverge in logic — one validates before mutating, another writes first and rolls back on error; one raises on duplicate, another silently overwrites; one is thread-safe, another races. These are intent-level bugs. The CONTRACT tier compares inputs validation rules, errors raised, side-effect order, return shape, and behavioral properties (async/thread-safe/pure/idempotent/reentrant) against the spec's `## Contract:` block — or cross-repo when spec is silent. |
 | "Trait satisfaction is a Rust thing, skip it for other languages" | Every language has an equivalent: Python `__str__` / TS `toString()` / Go `String()` / Rust `impl Display`. The protocol spec defines required interface contracts; each language must satisfy them with its idiomatic mechanism. Build a dedicated checklist row. |
 | "Multiple constructors are language-specific sugar" | Rust's `Self::new()` / `Self::with_config()` / `Self::from_env()` corresponds to Python `classmethod` factories, TS static factories, Go `NewX` / `NewXFromY`. If the spec defines multiple construction paths, every language must expose all of them. Treat constructors as a list, not a single entry. |
 | "Contract extraction (4B) already catches intent divergence, deep-chain is redundant" | NO. 4B's sub-agent is **one-per-repo doing shape extraction** — it lists `inputs/errors/side_effects` as declared fields. It cannot see bugs that only appear when you read the code: bare dict subscripts that throw `KeyError` on malformed input, internal methods that silently skip validation, functions that fail to update a map the peer language updates. These are visible in the AST, not in the contract shape. Step 4C reads all N languages' source for one module **side-by-side** and diffs the call graphs — that is how the `_discover_custom` / `discover_internal` / `for...of null` class of bugs get caught. |
-| "A sub-agent that reports 'no issues' means the module is fine" | NO. A polished 'all clear' report is the most dangerous output — it manufactures false confidence. Sub-agents MUST default to `inconclusive` when evidence is ambiguous and MUST cite `file:line:snippet` for every finding, including "no issue" claims. The orchestrator rejects any module report without per-symbol evidence citations and re-runs the sub-agent. |
+| "A sub-agent that reports 'no issues' means the module is lazy" | Zero findings IS a valid outcome — when backed by evidence. Sub-agents must cite `file:line:snippet` for every claim, including negative claims (e.g., "checked the validation path — `registry.py:L45-L52` performs the same guard as peers, no divergence"). The orchestrator rejects reports without evidence citations, NOT reports with zero findings. Do not fabricate low-severity findings to avoid an empty report. When evidence is genuinely ambiguous, emit `inconclusive` with a reason, not a made-up finding. |
+| "I found 0 issues in this dimension — I should report *something* to avoid looking lazy" | No. Quota-filling is the primary source of false positives in this skill. A dimension returning `FINDING_COUNT: 0` with a short "what I checked" note is a cleaner signal than a padded one. If unsure, use `inconclusive` — never invent. |
+| "The input could *theoretically* be malformed, so this is a security bug" | If the input source is internal/trusted (project's own files, hard-coded constants, type-checked internal calls, dev-local scanner output), this is not a security finding. Trust-boundary test: is the input source genuinely external (network, untrusted user, cross-trust-boundary file upload)? If not, drop or downgrade to warning. Speculative attacker scenarios on internal data flow are noise. |
+| "This could raise if someone passes a weird type" | Speculative failures on internal call sites are not bugs. Only flag when (a) a real call site exists that actually sources the weird type, or (b) it's a public API boundary where external callers exist. Justifications starting with "if X ever happens" / "could theoretically" / "in case someone..." do not qualify — those are speculation, not evidence. |
+| "Two SDKs differ on a defensive check — the stricter one is right, flag the looser one as CRITICAL" | Defensive-code divergence maxes out at WARNING unless the missing check causes observable divergence in the `## Contract:` block (different error raised, different side-effect order, different return shape). Same observable behavior + different defensive style = warning, or drop. Design-preference disagreements never justify a `critical`. |
 
 ## When to Use
 
@@ -83,7 +98,7 @@ Each tier is **cumulative** — higher tiers include all lower tiers.
 | `skeleton` | Contract tier + algorithm checkpoint sequence inside each public method | Static — grep `checkpoint:NAME` literal strings in source, compare ordered set against spec's `## Algorithm` section | Low — requires source instrumentation |
 | `behavior` | All static tiers + runtime behavioral equivalence — same input → same observable output across all SDKs | Dynamic — invokes `/apcore-skills:tester --mode run --category protocol` (Step 7.5) and merges results | High — runs tests |
 
-**Contract tier is the default** because it answers the question "do all SDKs agree on what the method DOES?" without requiring any source instrumentation or test execution. It captures intent (logic/purpose) divergence that pure signature comparison misses. See `./references/shared/contract-spec.md` for the `## Contract:` block format.
+**Contract tier is the default** because it answers the question "do all SDKs agree on what the method DOES?" without requiring any source instrumentation or test execution. It captures intent (logic/purpose) divergence that pure signature comparison misses. See `shared/contract-spec.md` for the `## Contract:` block format.
 
 **Deep-chain analysis (Step 4C, `--deep-chain on` by default) runs alongside every non-`none` tier.** It is **not** a `--internal-check` tier because it operates on a different axis: instead of comparing extracted **shape** (as contract/skeleton/behavior do), it compares actual **call graphs across languages**. A sub-agent reads all N languages' source for one module side-by-side and diffs the code directly. This catches bugs that shape extraction is structurally blind to (e.g., `for (const entry of customModules)` crashing on `null` when peer languages don't; internal methods skipping validation; maps missing an insert). See Step 4C.
 
@@ -159,7 +174,7 @@ Step 0 (ecosystem) → Step 1 (parse args) → PHASE A [Steps 2-5, including 4A/
 
 ### Step 0: Ecosystem Discovery
 
-@./references/shared/ecosystem.md
+@../references/shared/ecosystem.md
 
 Filter repos based on `--scope` and `--lang` flags. Identify documentation repos and implementation repos per scope group.
 
@@ -200,7 +215,7 @@ Parse `$ARGUMENTS` for all flags and positional repo names. Determine:
    - If it's a `docs-site` repo (`apcore-mcp/`) → set scope to `mcp`, include **all** mcp impl repos
    - If it's an `integration` repo → Phase A is N/A (integrations don't have a protocol spec to compare against), run Phase B only on this repo
    - If it's a `shared-lib` or `tooling` repo → run Phase B only on this repo (no spec to compare against)
-   - If CWD is not inside any discovered repo → use `AskUserQuestion` to ask: "CWD is not an apcore repo. Which repo do you want to sync?" with options from `repos[]` names + "All repos (full ecosystem scan)"
+   - If CWD is not inside any discovered repo → use `ask_user` to ask: "CWD is not an apcore repo. Which repo do you want to sync?" with options from `repos[]` names + "All repos (full ecosystem scan)"
 3. Display: "Scope: {repo-name} (from CWD). Use --scope all for full ecosystem scan."
 
 **If `--scope` IS specified:** use the explicit scope as before.
@@ -234,9 +249,9 @@ Verify that the documentation repo's feature specs and protocol spec match what 
 
 ### Step 2: Extract Public APIs (Parallel Sub-agents — One per Implementation Repo)
 
-Spawn one `Agent(subagent_type="general-purpose")` **per implementation repo, all simultaneously in a single round of parallel Agent calls**. Each sub-agent extracts the public API from one repo independently. Do NOT process repos sequentially.
+Spawn one `generalist(subagent_type="general-purpose")` **per implementation repo, all simultaneously in a single round of parallel generalist calls**. Each sub-agent extracts the public API from one repo independently. Do NOT process repos sequentially.
 
-**Sub-agent prompt:** Use the template from `./references/sync/references/extract-api-prompt.md`, filling in `{repo_path}` and `{package}` for each repo.
+**Sub-agent prompt:** Use the template from `@references/extract-api-prompt.md`, filling in `{repo_path}` and `{package}` for each repo.
 
 **Main context retains:** Each repo's structured API summary. Store as `api_summaries[repo_name]`.
 
@@ -247,11 +262,11 @@ Spawn one `Agent(subagent_type="general-purpose")` **per implementation repo, al
 For each documentation repo in scope, read the authoritative specs:
 
 **For `apcore/` (core scope):**
-1. Read `{doc_repo_path}/PROTOCOL_SPEC.md` — extract the API contract sections
+1. read_file `{doc_repo_path}/PROTOCOL_SPEC.md` — extract the API contract sections
 2. Scan `{doc_repo_path}/docs/features/*.md` — extract per-feature API definitions (classes, functions, parameters, return types, **trait/interface contracts**, **multi-constructor patterns**)
 3. If `{doc_repo_path}/docs/tech-design.md` (or `docs/tech-design/*.md`) exists — extract any internal interface contracts marked as normative. Tag them with `internal_contract: true` so Step 4A knows they apply to internal symbols, not just public API.
 4. From each feature spec, parse any `## Algorithm` section — extract the ordered checkpoint list for each public method. Store as `spec_skeletons[scope][symbol] = [checkpoint_1, checkpoint_2, ...]`. This is the input for Step 4A.
-4b. **From each feature spec, parse any `## Contract:` section** — extract the behavioral contract per `./references/shared/contract-spec.md`. For each spec Contract block, capture `{inputs[], preconditions[], side_effects[], postconditions[], errors[], returns, properties{}}`. Store as `spec_contracts[scope][symbol] = {...}`. This is the input for Step 4B.
+4b. **From each feature spec, parse any `## Contract:` section** — extract the behavioral contract per `shared/contract-spec.md`. For each spec Contract block, capture `{inputs[], preconditions[], side_effects[], postconditions[], errors[], returns, properties{}}`. Store as `spec_contracts[scope][symbol] = {...}`. This is the input for Step 4B.
 5. If `{doc_repo_path}/docs/spec/type-mapping.md` exists — load cross-language type mappings
 
 **For `apcore-mcp/` (mcp scope):**
@@ -268,7 +283,7 @@ All three must be matched by implementations. If a public method has no `## Cont
 
 **For all documentation repos:**
 
-6. Read `{doc_repo_path}/CHANGELOG.md` — extract all symbols listed under `### Removed` or `### Deprecated` sections, grouped by version. Store as `deprecated_api[scope]` = list of `{symbol, version, section}` entries. These are used in Phase B Step 6 to flag doc examples that reference removed/deprecated APIs.
+6. read_file `{doc_repo_path}/CHANGELOG.md` — extract all symbols listed under `### Removed` or `### Deprecated` sections, grouped by version. Store as `deprecated_api[scope]` = list of `{symbol, version, section}` entries. These are used in Phase B Step 6 to flag doc examples that reference removed/deprecated APIs.
 
    CHANGELOG is NOT checked for its own correctness (that remains a release artifact). It is used ONLY as a **signal source** to detect stale references in documentation examples.
 
@@ -292,7 +307,7 @@ If a feature spec has no `## Algorithm` section for a given method, Step 4A skip
 
 ### Step 4: Checklist Comparison (The Core of Phase A)
 
-@./references/shared/api-extraction.md
+@../references/shared/api-extraction.md
 
 Build an explicit per-symbol checklist and evaluate every single item. No shortcuts.
 
@@ -402,6 +417,13 @@ Checklist items per CLASS:
 1. Constant exists in each implementation?
 2. Type matches ✓? Value matches ✓?
 
+#### 4.3 Protocol Compliance Check
+
+For each implementation repo, compare against the spec API:
+1. **Missing from spec** — implementation has symbols not defined in spec (language-specific additions)
+2. **Missing from implementation** — spec defines symbols not in implementation
+3. **Divergence** — implementation doesn't match spec definition
+
 #### 4A: Internal Skeleton Consistency (when --internal-check >= skeleton)
 
 **Purpose:** verify that each public method's *internal algorithm* follows the same checkpoint sequence across languages, without requiring helper-function identity. This is the only static check sync performs on internal implementation.
@@ -421,7 +443,7 @@ Checklist items per CLASS:
 | Rust | `tracing::debug!("checkpoint:NAME")` or `tracing::trace_span!("checkpoint:NAME")` | `tracing::debug!("checkpoint:validate_id_format")` |
 | Java | `logger.debug("checkpoint:NAME")` or `Span.current().addEvent("checkpoint:NAME")` | `logger.debug("checkpoint:validate_id_format")` |
 
-> **Note:** The example call sites above are *illustrative*. The normative extraction rule is the regex in api-extraction.md E.4a, which matches any string literal of the form `"checkpoint:NAME"` regardless of which logger/tracer API wraps it. Any new logging or tracing library that accepts string arguments will automatically work without updating this table.
+> **Note:** The example call sites above are *illustrative*. The normative extraction rule is the regex in `shared/api-extraction.md` E.4a, which matches any string literal of the form `"checkpoint:NAME"` regardless of which logger/tracer API wraps it. Any new logging or tracing library that accepts string arguments will automatically work without updating this table.
 
 The literal prefix is `checkpoint:` followed by a snake_case identifier. Sub-agents in Step 2 grep for `checkpoint:[a-z_][a-z0-9_]*` inside each public method's source body and return them in their natural source order as a `skeleton` field on each method object. Main context flattens to `repo_skeletons[repo_name][symbol] = method.skeleton` after all sub-agents return.
 
@@ -461,7 +483,7 @@ The literal prefix is `checkpoint:` followed by a snake_case identifier. Sub-age
 
 **Inputs to this step:**
 - `spec_contracts[scope][symbol]` from Step 3 (may be empty or partial)
-- `repo_contracts[repo_name][symbol]` — flattened from each sub-agent's `contract` field on every method/function (see Step 2 and api-extraction.md E.4b)
+- `repo_contracts[repo_name][symbol]` — flattened from each sub-agent's `contract` field on every method/function (see Step 2 and `shared/api-extraction.md` E.4b)
 
 **Comparison rules.** For each `(symbol, repo)` pair:
 
@@ -564,8 +586,8 @@ Initialize `module_progress[module_name] = {status: pending, findings_count: 0, 
 
 Dispatch sub-agents in **batches of at most 5 simultaneously** (bounded concurrency — too many parallel sub-agents starve the orchestrator's tool budget). For each batch:
 
-1. Launch `Agent(subagent_type="general-purpose")` for each module in the batch, all in a single round of parallel Agent calls
-2. Each sub-agent uses the template from `./references/sync/references/deep-chain-prompt.md`, with these variables filled:
+1. Launch `generalist(subagent_type="general-purpose")` for each module in the batch, all in a single round of parallel generalist calls
+2. Each sub-agent uses the template from `@references/deep-chain-prompt.md`, with these variables filled:
    - `{module_name}` — the logical module
    - `{repos}` — list of implementation repo names
    - `{source_files}` — map of `{lang: file_path}` for this module
@@ -752,11 +774,11 @@ Spawn sub-agents in parallel: **one per documentation repo** + **one per impleme
 
 #### Sub-agent for Documentation Repo (apcore/ or apcore-mcp/)
 
-**Sub-agent prompt:** Use the template from `./references/sync/references/audit-doc-repo-prompt.md`, filling in `{doc_repo_path}`, injecting `{verified_api}` from Step 4.4, and `{deprecated_api}` from Step 3.
+**Sub-agent prompt:** Use the template from `@references/audit-doc-repo-prompt.md`, filling in `{doc_repo_path}`, injecting `{verified_api}` from Step 4.4, and `{deprecated_api}` from Step 3.
 
 #### Sub-agent for Implementation Repo (apcore-python/, apcore-typescript/, etc.)
 
-**Sub-agent prompt:** Use the template from `./references/sync/references/audit-impl-repo-prompt.md`, filling in `{impl_repo_path}` and injecting the `{verified_api}` for that repo from Step 4.4.
+**Sub-agent prompt:** Use the template from `@references/audit-impl-repo-prompt.md`, filling in `{impl_repo_path}` and injecting the `{verified_api}` for that repo from Step 4.4.
 
 **Main context retains:** Structured findings per repo.
 
@@ -805,13 +827,13 @@ Sync alone cannot verify that two implementations produce the same outputs for t
    ```
    /apcore-skills:tester {repo1} {repo2} {repo3} --mode run --category protocol --save tester-{date}.md
    ```
-3. **Concrete example. ** For `/apcore-skills:sync --lang python,rust --internal-check=behavior` with discovered repos `apcore-python`, `apcore-typescript`, `apcore-rust`:
+3. **Concrete example.** For `/apcore-skills:sync --lang python,rust --internal-check=behavior` with discovered repos `apcore-python`, `apcore-typescript`, `apcore-rust`:
    ```
    /apcore-skills:tester apcore-python apcore-rust --mode run --category protocol --save tester-2026-04-07.md
    ```
    (`apcore-typescript` is excluded by the language pre-filter.)
 
-**Result merging. **
+**Result merging.**
 
 1. Capture the tester report and parse its `Cross-Language Equivalence` section
 2. Merge any FAIL findings into Phase B findings under scope `behavior` with severity mapping:
@@ -1110,9 +1132,9 @@ _(No actionable issues found — all checks passed.)_
 
 ### Step 10: Auto-Fix (only with --fix flag)
 
-Group all findings from both phases by repo. Spawn one `Agent(subagent_type="general-purpose")` **per repo that has fixable findings, all in parallel**.
+Group all findings from both phases by repo. Spawn one `generalist(subagent_type="general-purpose")` **per repo that has fixable findings, all in parallel**.
 
-**Sub-agent prompts:** Use the templates from `./references/sync/references/fix-prompts.md`. The file contains two prompt templates:
+**Sub-agent prompts:** Use the templates from `@references/fix-prompts.md`. The file contains two prompt templates:
 - **Fix Implementation Repo** — for each implementation repo with findings, fill in `{repo_path}`, `{language}`, and inject the Phase A/B findings.
 - **Fix Documentation Repo** — for each documentation repo with findings, fill in `{doc_repo_path}` and inject the Phase B findings.
 

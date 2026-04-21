@@ -1,20 +1,24 @@
 ---
-description: "Bootstrap and implement a new language SDK for the apcore ecosystem. Scaffolds the project structure, extracts API contract, then automatically continues with code-forge:port (plan generation) and code-forge:impl (TDD implementation) to deliver a fully implemented SDK — not just stubs."
-argument-hint: "<language> [--type <type>] [--ref <repo>]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, TaskCreate, TaskUpdate, TaskList, TaskGet]
+description: "Bootstrap and implement a new language SDK for the apcore ecosystem.\
+  \ Scaffolds the project structure, extracts API contract, then automatically continues\
+  \ with code-forge:port (plan generation) and code-forge:impl (TDD implementation)\
+  \ to deliver a fully implemented SDK \u2014 not just stubs."
+argument-hint: /apcore-skills:sdk <language> [--type <type>] [--ref <repo>]
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Apcore Skills — SDK
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file the first executable step, perform it, then the next, etc., until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual SDK bootstrap", "回退到手动 SDK", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `AskUserQuestion` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the first step, or (b) an `ask_user` if the first step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -73,14 +77,14 @@ Step 0 (ecosystem) → 1 (parse args) → 2 (extract API contract) → 3 (tech s
 
 ## Bundled References
 
-- `references/sdk/references/extract-api-contract.md` — Sub-agent prompt template for Step 2
-- `references/sdk/references/scaffold-project.md` — Sub-agent prompt template for Step 4
+- `references/extract-api-contract.md` — Sub-agent prompt template for Step 2
+- `references/scaffold-project.md` — Sub-agent prompt template for Step 4
 
 ## Detailed Steps
 
 ### Step 0: Ecosystem Discovery
 
-@./references/shared/ecosystem.md
+@../references/shared/ecosystem.md
 
 **Data flow:** Step 0 produces the following variables used by subsequent steps:
 - `ecosystem_root` — absolute path to the parent directory containing all apcore repos
@@ -126,7 +130,7 @@ SDK Bootstrap:
 
 ### Step 2: Extract API Contract (Sub-agent)
 
-Spawn `Agent(subagent_type="general-purpose")` with the prompt from `references/sdk/references/extract-api-contract.md`, filling in: `{lang}`, `{ref_path}`, `{type}`, `{protocol_path}`.
+Spawn `generalist(subagent_type="general-purpose")` with the prompt from `references/extract-api-contract.md`, filling in: `{lang}`, `{ref_path}`, `{type}`, `{protocol_path}`.
 
 Store result as `api_contract`. If the sub-agent returns STATUS: NOT_FOUND or NO_EXPORTS, display error and ask the user to either provide a different reference or abort.
 
@@ -136,7 +140,7 @@ Store result as `api_contract`. If the sub-agent returns STATUS: NOT_FOUND or NO
 
 Ask the user to confirm the target language tech stack.
 
-@./references/shared/conventions.md (refer to "Testing Conventions" and "Dependency Conventions" sections)
+@../references/shared/conventions.md (refer to "Testing Conventions" and "Dependency Conventions" sections)
 
 **For Go:**
 - Go version: "1.21+ (Recommended)" / "1.22+"
@@ -164,7 +168,7 @@ Store `tech_stack` decisions.
 
 ### Step 4: Scaffold Project (Sub-agent)
 
-Spawn `Agent(subagent_type="general-purpose")` with the prompt from `references/sdk/references/scaffold-project.md`, filling in: `{target-repo-name}`, `{target-path}`, `{lang}`, `{type}`, `{tech_stack}`, `{package_name}`, `{api_contract}`, `{ref_path}`, `{conventions_path}` (= resolved path to `./references/shared/conventions.md`).
+Spawn `generalist(subagent_type="general-purpose")` with the prompt from `references/scaffold-project.md`, filling in: `{target-repo-name}`, `{target-path}`, `{lang}`, `{type}`, `{tech_stack}`, `{package_name}`, `{api_contract}`, `{ref_path}`, `{conventions_path}` (= resolved path to `../shared/conventions.md`).
 
 After sub-agent completes, verify:
 - Build config file exists
@@ -206,7 +210,7 @@ If they don't exist:
 
 ### Step 6: Generate .code-forge.json
 
-Write `{target-path}/.code-forge.json`:
+write_file `{target-path}/.code-forge.json`:
 ```json
 {
   "directories": {
@@ -277,7 +281,7 @@ Implementation plans generated. Starting TDD implementation...
 
 Invoke `/code-forge:impl` to execute all planned features sequentially. Each feature follows the TDD Red-Green-Refactor cycle:
 1. Run failing tests (red — already created in Step 4)
-2. Write minimal implementation to pass (green)
+2. write_file minimal implementation to pass (green)
 3. Refactor for idiom and clarity
 
 Continue until all features are implemented or a blocking error occurs. If a blocking error occurs, stop and display the error with context so the user can intervene.
@@ -303,7 +307,7 @@ Once `code-forge:impl` has finished all planned features, run the full consisten
 This compares the new SDK against the reference for:
 - Public API signatures (Phase A Steps 4.1–4.3)
 - Behavioral contracts — SHAPE-LEVEL (Step 4B: inputs validation tuples, errors, side effects, return shape, properties)
-- **Call graphs — CHAIN-LEVEL (Step 4C: cross-language source diff per module — catches bugs that shape extraction is blind to, like internal methods skipping validation, defensive gaps on null/malformed inputs, missing-registration into maps)**
+- **Call graphs — CHAIN-LEVEL (Step 4C: cross-language source diff per module — catches bugs that shape extraction is blind to, like internal methods skipping validation, defensive gaps on null/malformed inputs, missing map-inserts)**
 - Documentation (Phase B)
 
 Parse the saved report for:
@@ -343,7 +347,7 @@ Rationale: all four counts measure distinct failure modes:
 
 None of them is acceptable in a just-bootstrapped SDK; tolerating one silently defeats the post-impl gate's purpose. **Chain-level `inconclusive` counts because a just-bootstrapped SDK should leave zero uncertainty** — if the deep-chain sub-agent could not determine whether the new SDK matches the reference, the operator must resolve the uncertainty before shipping.
 
-On FAIL, display the top findings and use `AskUserQuestion`:
+On FAIL, display the top findings and use `ask_user`:
 - "Run /code-forge:fix --review" — consumes the sync + tester review-compatible outputs and auto-patches
 - "Manual fix — I'll do it" — stops here; user re-runs `/apcore-skills:sdk` after fixing (step 9.5 will re-run)
 - "Accept and continue (NOT RECOMMENDED)" — requires rationale logged to `{ecosystem_root}/sdk-gate-overrides.md`
@@ -375,3 +379,9 @@ Next steps:
   /apcore-skills:audit                              Comprehensive ecosystem check
   /apcore-skills:release                            Coordinated release
 ```
+
+## Coordination with Other Skills
+
+- **After sdk:** Use `apcore-skills:sync` to verify cross-language consistency
+- **Before release:** Use `apcore-skills:audit` for comprehensive check
+- **For release:** Use `apcore-skills:release` for coordinated version bump

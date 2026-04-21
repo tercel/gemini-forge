@@ -110,7 +110,7 @@ SDK Bootstrap:
 
 ## Step 2: Extract API Contract (Sub-agent)
 
-The skill instructs spawning a sub-agent (`Task(subagent_type="general-purpose")`) to extract the complete public API contract from `apcore-python`.
+The skill instructs spawning a sub-agent (`generalist(subagent_type="general-purpose")`) to extract the complete public API contract from `apcore-python`.
 
 ### What the sub-agent would read
 
@@ -404,7 +404,7 @@ EXTENSION_POINTS:
 
 ## Step 3: Confirm Tech Stack
 
-The skill instructs using `AskUserQuestion` with Go-specific options. The questions would be:
+The skill instructs using `ask_user` with Go-specific options. The questions would be:
 
 ### Questions Presented to User
 

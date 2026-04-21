@@ -65,7 +65,7 @@ Same as the main review skill's project type detection (Step 3F.2 / 3P.2):
 
 ### Step 4: 15-Dimension Review (via Sub-agent)
 
-Spawn an `Agent` sub-agent with `subagent_type: "general-purpose"`.
+Spawn an `generalist` sub-agent with `subagent_type: "general-purpose"`.
 
 **Sub-agent prompt must include:**
 
@@ -77,9 +77,19 @@ Spawn an `Agent` sub-agent with `subagent_type: "general-purpose"`.
 - **All 15 review dimensions** from the main SKILL.md's [Review Dimensions Reference]
 - The 4-tier severity definitions (blocker / critical / warning / suggestion)
 - **MANDATORY pre-analysis instruction:** *"Before applying any review dimension, read every changed file in full and build a call graph for every public method / exported function touched by the diff. Enumerate helpers called, validations performed, state mutations executed, errors raised, and external-input paths. Output as `METHOD_CHAINS` per `references/sub-agent-format.md`. Only after producing METHOD_CHAINS may you apply dimensions. Scope note: the graph is rooted at symbols MODIFIED by the diff — not every public symbol in every changed file. Do not trust method names or helper-function purity — open and read every callee. See the §Call-Graph Discipline section of the main review SKILL.md."*
-- Instruction: **"Review ONLY the changes in this PR diff. Do not flag pre-existing issues. For each issue, specify severity, file path, line number/range, title, description, and fix suggestion. When an issue was discovered via the call graph, reference the relevant METHOD_CHAINS entry."**
+- **MANDATORY post-analysis instruction (especially important for GitHub PR mode — speculative findings on a public PR damage trust more than no findings):** *"After applying dimensions and BEFORE writing any finding, route every candidate through §Finding Suppression Gate (Gates 1-4) in the main review SKILL.md. Drop speculative findings ('could theoretically', 'if X ever happens'). Drop D1/D2 findings whose input source is internal/trusted under the project's threat model. Downgrade design-preference 'critical' to `warning`. Accept empty dimensions. Every `critical`/`blocker` finding MUST include a non-empty `evidence` field showing concrete reachability. The PR will be visible to the team — be conservative."*
+- Instruction: **"Review ONLY the changes in this PR diff. Do not flag pre-existing issues. For each issue, specify severity, file path, line number/range, title, description, and fix suggestion. When an issue was discovered via the call graph, reference the relevant METHOD_CHAINS entry. For critical/blocker findings, the `evidence` field must show: (a) concrete trigger input, (b) observable wrong behavior, (c) trust-boundary argument for D2 / defensive-gap findings."**
 
 **Sub-agent must return the same structured format** as the main review skill (REVIEW_SUMMARY + per-dimension sections + **METHOD_CHAINS**). The orchestrator MUST verify METHOD_CHAINS is populated (covers every diff-modified public symbol) before posting to GitHub — a review posted to a public PR without the pre-analysis would be worse than no review because reviewers would wrongly trust its completeness. If the sub-agent fails the METHOD_CHAINS check twice, abort the post and surface the failure locally; do NOT post an incomplete review to the PR.
+
+**Suppression-Gate validation (mandatory before posting to GitHub):** Apply the same five checks as the main review SKILL.md Step 4F:
+1. **Evidence presence (critical/blocker)** — every critical/blocker requires non-empty `evidence`; reject and re-invoke; auto-downgrade after second failure.
+2. **Speculative-phrase scan (ALL severities — DROP)** — drop every finding whose description matches the speculative tells (`could theoretically` / `if .* ever` / `in case someone` / `potentially might` / `non-deterministic` / `might be nicer` / `smells wrong` / `feels off`) at any severity. Do not downgrade-and-keep.
+3. **Trust-boundary check (critical/blocker)** — auto-downgrade D2/defensive-gap critical/blocker findings whose evidence describes internal/trusted sources for `library`/`cli`/`unknown` project types. Skip for `frontend`/`backend`/`fullstack`.
+4. **Warning-level observable-downside check (DROP)** — drop surviving warnings with no named observable downside (pure pattern/style divergence).
+5. **Suggestion-level concrete-benefit check (DROP)** — drop surviving suggestions with no named concrete benefit.
+
+**Public-PR specific cutoff:** if Report Health verdict (per SKILL.md §Report Health computation) contains any of the `gated` (auto-downgrade share > 30%), `noisy` (density > 2.0), or `fabricating` (drop share > 40%) flags — verdict is the comma-joined flag list, so check substring membership — **abort the GitHub post and surface locally instead** with the message: *"Review quality below public-PR threshold (verdict: {verdict}). Findings indicate quota-filling or systematic gate bypass. Posting to PR aborted to protect team trust. Run /code-forge:review --github-pr again after iterating on the underlying review skill, or post a manual review."* Posting low-quality reviews to public PRs is more damaging than not posting. (The `inflated` flag alone does NOT trigger abort — it indicates severity inflation but the underlying issues may still be real bugs the team should see; the auto-downgrade markers will already signal which were lowered. The `fabricating` flag is the strongest abort signal — a gate that had to drop >40% of findings means the remaining ones are also suspect.)
 
 ### Step 5: Filter Issues for GitHub
 

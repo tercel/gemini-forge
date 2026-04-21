@@ -47,7 +47,7 @@ Parse the arguments to determine what to review:
 2. If no argument, scan `docs/` for the most recent tech-design and all feature specs in `docs/features/`
 3. If no spec documents found, inform the user and stop
 
-Use `AskUserQuestion` to ask:
+Use `ask_user` to ask:
 - **Review scope**: Review all generated specs, or focus on specific documents? (Options: All / Tech design only / Feature specs only / Specific files)
 - **Auto-fix**: Should I auto-fix issues found? (Options: Yes — fix Critical+Major automatically / Yes — fix all / No — report only)
 
@@ -157,7 +157,7 @@ If `REVIEW_RESULT: ISSUES_FOUND`, proceed based on user's auto-fix preference fr
 - **Report only**: Display all findings and stop
 - **Auto-fix**: Proceed to Step 6
 
-If auto-fix was not pre-selected, ask now via `AskUserQuestion`:
+If auto-fix was not pre-selected, ask now via `ask_user`:
 - **Fix Critical+Major** — auto-fix significant issues
 - **Fix all** — auto-fix everything
 - **Skip** — just the report

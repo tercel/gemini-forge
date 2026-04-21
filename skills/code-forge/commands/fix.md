@@ -1,20 +1,23 @@
 ---
-description: "Debug and fix bugs with interactive upstream trace-back — diagnoses root cause level, confirms upstream document updates, and applies TDD fixes"
-argument-hint: "[bug-description | @bug-report.md | --review [feature-name]] [--repos path1 path2 ...]"
-allowed-tools: [Read, Glob, Grep, Write, Edit, Bash, AskUserQuestion, Task, Agent]
+description: "Debug and fix bugs with interactive upstream trace-back \u2014 diagnoses\
+  \ root cause level, confirms upstream document updates, and applies TDD fixes. Supports\
+  \ --repos flag for parallel bug fixing across multiple repositories."
+argument-hint: ''
+allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
+  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
+  tracker_list_tasks
 ---
-
 # Code Forge — Fix
 
 ## ⚡ Execution Entry Point (READ THIS FIRST)
 
-**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** Read Step 0.1 (Multi-Repo Detection), then Step 0.5, then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `AskUserQuestion` checkpoint.
+**When this skill is loaded, you MUST immediately begin executing the Workflow below — do not wait, do not summarize, do not ask "what should I do now". Skills are operational manuals, not reference documents.** read_file Step 0.1 (Multi-Repo Detection), then Step 0.5, then Steps 1, 2, 3, ... in order, until the workflow completes or you reach an `ask_user` checkpoint.
 
 If the harness shows you `Successfully loaded skill · N tools allowed`, that message means **the SKILL.md content was injected into your context** — it does NOT mean the skill has run. Skills do not "run" autonomously; you run them by executing the Detailed Steps below.
 
 If you find yourself about to say "the skill didn't produce output", "skill 仍未输出", "falling back to manual fix", "回退到手动 fix", or anything similar, **STOP**. You have misunderstood how skills work. Go directly to the first executable step and start.
 
-The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `AskUserQuestion` if a step needs disambiguation. Never an apology, never a fallback, never silence.
+The first user-visible action of this skill should be either (a) the output of the early steps of the workflow, or (b) an `ask_user` if a step needs disambiguation. Never an apology, never a fallback, never silence.
 
 ---
 
@@ -55,9 +58,9 @@ If `$ARGUMENTS` does **not** contain `--repos`, skip this step and continue belo
 
 **Note:** `--review` and `--repos` cannot be combined. If both are present, show error: "Cannot combine --review with --repos. Review reports are per-repo — run `/code-forge:fix --review` in each repo separately."
 
-If `--repos` is present (without `--review`): first, locate the skill installation directory by finding this SKILL.md file's parent (use `Glob` for `**/skills/fix/SKILL.md` if needed). Then dispatch `Agent(subagent_type="general-purpose", description="Fix --repos coordinator")` with prompt containing the **resolved absolute paths**:
+If `--repos` is present (without `--review`): first, locate the skill installation directory by finding this SKILL.md file's parent (use `glob` for `**/skills/fix/SKILL.md` if needed). Then dispatch `generalist(subagent_type="general-purpose", description="Fix --repos coordinator")` with prompt containing the **resolved absolute paths**:
 
-> Read these two files and follow them exactly:
+> read_file these two files and follow them exactly:
 > 1. `{resolved_absolute_path}/skills/shared/multi-repo.md` — the protocol steps MR-1~MR-5
 > 2. `{resolved_absolute_path}/skills/fix/multi-repo-defs.md` — the fix-specific definitions
 >
@@ -97,7 +100,7 @@ Accept input in three modes:
 - Ends with `.md` (e.g., `bug-123.md`)
 - Matches an existing file or directory on disk
 
-**Action:** Use `AskUserQuestion`:
+**Action:** Use `ask_user`:
 
 ```
 Your input looks like a file path: "{input}"
@@ -110,7 +113,7 @@ Did you mean to use file mode? (file paths require an @ prefix)
 
 ---
 
-If no input provided, use `AskUserQuestion` to ask: "Describe the bug you encountered."
+If no input provided, use `ask_user` to ask: "Describe the bug you encountered."
 
 For prompt text and file reference modes, store the bug description and continue to Step 2.
 
@@ -129,7 +132,7 @@ Locate and parse the review report. The review report lives **in the current con
 2. **Saved file (fallback):** Only if no review report exists in the current conversation:
    - With feature name (`--review my-feature`): read `{output_dir}/{feature_name}/review.md`
    - Without feature name (`--review`): search `{output_dir}/project-review.md` first, then scan `{output_dir}/*/review.md`
-   - If multiple found: use `AskUserQuestion` to let user select
+   - If multiple found: use `ask_user` to let user select
 
 3. **Neither found:** Show error — "No review report found in this session. Run `/code-forge:review` first, or `/code-forge:review --save` to persist to disk."
 
@@ -156,7 +159,7 @@ Locate and parse the review report. The review report lives **in the current con
      ...
    ```
 
-   Use `AskUserQuestion`: "Fix all {N} issues? Or enter issue numbers to fix selectively (e.g., `1,3,5`)."
+   Use `ask_user`: "Fix all {N} issues? Or enter issue numbers to fix selectively (e.g., `1,3,5`)."
 
    - **"all" / "yes"** → process all issues
    - **Comma-separated numbers** → process only selected issues
@@ -168,7 +171,7 @@ Locate and parse the review report. The review report lives **in the current con
    - Set the issue's `title + description + suggestion` as the bug description
    - The review already provides `file`, `line`, `description`, and `suggestion` — use these directly as the diagnosis. Only spawn a diagnostic sub-agent (Step 4) if the review's suggestion is vague or the fix is non-obvious.
    - Execute Step 6 (TDD Fix) directly:
-     - **6.1** Write a regression test targeting the specific issue
+     - **6.1** write_file a regression test targeting the specific issue
      - **6.2** Implement the fix (use the review's `suggestion` as guidance)
      - **6.3** Run full test suite
      - **6.4** Commit with message: `fix: {issue title} ({file}:{line})`
@@ -223,8 +226,8 @@ Locate and parse the review report. The review report lives **in the current con
 
 Scan the project codebase to understand the context:
 
-1. Use `Glob` to get project structure overview
-2. Use `Grep` to search for keywords from the bug description in the codebase
+1. Use `glob` to get project structure overview
+2. Use `grep_search` to search for keywords from the bug description in the codebase
 3. Identify files and modules likely related to the bug
 4. Note the tech stack and testing framework used
 
@@ -241,7 +244,7 @@ Attempt to associate the bug with an existing code-forge feature:
 3. **Match found** → load the feature's `plan.md` and relevant `tasks/*.md` as additional context. Note the feature name.
 4. **No match found** → mark as standalone bug. Skip upstream trace-back (Steps 5 and 7). Proceed with code-only fix.
 
-If multiple features match, use `AskUserQuestion` to let user select the most relevant one.
+If multiple features match, use `ask_user` to let user select the most relevant one.
 
 ---
 
@@ -249,7 +252,7 @@ If multiple features match, use `AskUserQuestion` to let user select the most re
 
 **Offload to sub-agent** for deep analysis.
 
-Spawn an `Agent` tool call with:
+Spawn an `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"Diagnose bug root cause"`
 
@@ -264,7 +267,7 @@ Spawn an `Agent` tool call with:
 | Level | Description | Example |
 |-------|------------|---------|
 | 1 | Code bug | Logic error, boundary miss, typo, wrong variable |
-| 2 | Incomplete task description | Task.md steps missing a case, wrong acceptance criteria |
+| 2 | Incomplete task description | generalist.md steps missing a case, wrong acceptance criteria |
 | 3 | Plan design flaw | Architecture doesn't handle a scenario, missing component |
 | 4 | Incomplete requirement doc | Original feature doc missing a requirement |
 
@@ -307,7 +310,7 @@ Upstream documents affected:
 
 #### 5.2 Per-Level Confirmation
 
-For each affected upstream level (from lowest to highest), use `AskUserQuestion`:
+For each affected upstream level (from lowest to highest), use `ask_user`:
 
 "Root cause traced to **{level_name}**: `{doc_path}` — {what's wrong}. Update this document?"
 
@@ -329,13 +332,13 @@ Compile the fix plan:
 
 Execute the fix following TDD methodology.
 
-**Mandatory before 6.1:** Apply the design-first discipline. Bug fixes are the most common site of patch-soup development — adding a special case to compensate for buggy logic, instead of fixing the underlying logic, is the textbook "bug-fix epicycle" anti-pattern. Read the affected subsystem fully, understand why the bug exists, and determine whether the right fix is a localized correction or a small refactor of the surrounding code. Do **not** add an `if special_case:` branch when the underlying logic is wrong — fix the logic. Public interfaces remain stable throughout. The full discipline:
+**Mandatory before 6.1:** Apply the design-first discipline. Bug fixes are the most common site of patch-soup development — adding a special case to compensate for buggy logic, instead of fixing the underlying logic, is the textbook "bug-fix epicycle" anti-pattern. read_file the affected subsystem fully, understand why the bug exists, and determine whether the right fix is a localized correction or a small refactor of the surrounding code. Do **not** add an `if special_case:` branch when the underlying logic is wrong — fix the logic. Public interfaces remain stable throughout. The full discipline:
 
-@../shared/design-first.md
+@../references/shared/design-first.md
 
-#### 6.1 Write Regression Test
+#### 6.1 write_file Regression Test
 
-Write a test that reproduces the bug:
+write_file a test that reproduces the bug:
 - Test must FAIL with the current code (proving the bug exists)
 - Test must describe the expected correct behavior
 
@@ -347,7 +350,7 @@ Make the minimal code changes to fix the bug — but "minimal" means "minimal *c
 
 Run the regression test to verify it passes.
 
-#### 6.3 Run Full Test suite
+#### 6.3 Run Full Test Suite
 
 Run the project's full test suite to ensure no regressions:
 - If tests pass: continue
@@ -379,7 +382,7 @@ Before modifying each document, show the proposed changes in diff format:
 + new content
 ```
 
-Ask user: "Apply this change?" (Yes / No / Edit manually)
+Ask user: "Apply this change?" (Yes / No / replace manually)
 
 #### 7.2 Apply Changes
 
@@ -400,7 +403,7 @@ docs: update {doc_path} — traced from bug fix
 
 If the bug is associated with a feature:
 
-1. Read the feature's `state.json`
+1. read_file the feature's `state.json`
 2. Add a `fixes` array (if not present) to the feature-level metadata
 3. Append a fix record:
    ```json
@@ -446,3 +449,4 @@ Next steps:
   /code-forge:status {feature}    View updated progress
   /code-forge:review {feature}    Review all changes
 ```
+

@@ -341,7 +341,7 @@ TESTS:
 
 ## Step 3: Confirm Tech Stack (Questions for Rust)
 
-The skill instructs to present these choices via `AskUserQuestion`:
+The skill instructs to present these choices via `ask_user`:
 
 ```
 Rust MCP Bridge — Tech Stack Confirmation:
