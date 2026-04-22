@@ -4,6 +4,10 @@ description: >
   Use when facing 2+ independent problems that can be solved concurrently —
   dispatches one sub-agent per problem domain for parallel investigation and fixing.
   For parallel task execution within a feature, use code-forge:impl instead.
+instructions: >
+  This sub-skill enables concurrent problem-solving by dispatching independent sub-agents 
+  to address unrelated issues or bug reports. It systematically assesses problem 
+  independence to prevent conflicts and ensure efficient resolution across different domains.
 ---
 
 # Code Forge — Parallel

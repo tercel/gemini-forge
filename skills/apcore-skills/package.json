@@ -1,6 +1,6 @@
 {
   "name": "apcore-skills-gemini",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Apcore ecosystem management skill for Claude Code. Handles cross-language SDK synchronization, framework integration scaffolding, multi-repo audits, coordinated releases, and documentation alignment.",
   "main": "index.js",
   "scripts": {

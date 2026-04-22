@@ -7,6 +7,11 @@ description: >
   spec-forge:test-cases analysis pipeline (project profile, four-layer deep scan,
   multi-dimensional coverage) then implements all cases via TDD, (3) Driven — reads
   a test-cases.md document and implements each case via TDD.
+instructions: >
+  This sub-skill enforces a strict Test-Driven Development (TDD) cycle for any code 
+  change or bug fix outside the standard implementation workflow. It guides the 
+  Red-Green-Refactor process, ensuring no production code is written without a 
+  corresponding failing test.
 ---
 
 # Code Forge — TDD

@@ -1,11 +1,5 @@
 ---
-description: "Debug and fix bugs with interactive upstream trace-back \u2014 diagnoses\
-  \ root cause level, confirms upstream document updates, and applies TDD fixes. Supports\
-  \ --repos flag for parallel bug fixing across multiple repositories."
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Debug and fix bugs with interactive upstream trace-back — diagnoses root cause level, confirms upstream document updates, and applies TDD fixes. Supports --repos flag for parallel bug fixing across multiple repositories."
 ---
 # Code Forge — Fix
 

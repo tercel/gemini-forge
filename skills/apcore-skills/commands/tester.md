@@ -5,12 +5,6 @@ description: "Spec-driven test generation and cross-language test verification f
   \ test cases, runs them across all language implementations in parallel, and reports\
   \ behavioral inconsistencies. Acts as the ecosystem's quality gatekeeper \u2014\
   \ audit checks static consistency, tester checks runtime correctness."
-argument-hint: /apcore-skills:tester [<repos...>] [--spec <feature>] [--mode generate|run|full]
-  [--category unit|integration|boundary|protocol|contract|conformance|all] [--save
-  report.md]
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
 ---
 # Apcore Skills — Tester
 

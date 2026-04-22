@@ -1,11 +1,5 @@
 ---
-description: "Use before claiming work is done, fixed, or passing \u2014 requires\
-  \ running verification commands and confirming output before any success claim.\
-  \ Prevents false completion claims, unverified assertions, and \"should work\" statements."
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Verify work before claiming completion."
 ---
 # Code Forge — Verify
 

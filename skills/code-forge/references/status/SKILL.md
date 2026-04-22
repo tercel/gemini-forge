@@ -4,6 +4,11 @@ description: >
   Display code-forge feature dashboard with task-level progress from state.json, or show
   detailed status for a specific feature. Use when checking progress, asking "what's left",
   viewing task completion, or wanting a bird's-eye view of the project.
+instructions: >
+  This sub-skill provides a comprehensive dashboard for tracking the progress of all 
+  features or detailed status for a specific feature. It reads from state files to 
+  visualize task completion and updates the project-level overview to keep the 
+  development status current.
 ---
 
 # Code Forge — Status

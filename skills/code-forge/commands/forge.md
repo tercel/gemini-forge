@@ -1,6 +1,5 @@
 ---
 description: "Show all code-forge commands and usage guide"
-allowed-tools: [Read, Glob, Grep]
 ---
 
 The user invoked `/code-forge:forge`. This is a legacy entry point.

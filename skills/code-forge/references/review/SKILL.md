@@ -5,6 +5,10 @@ description: >
   15-dimension quality analysis for features or entire projects (generate mode), structured
   evaluation and response to incoming review comments (feedback mode via --feedback flag),
   or automated PR review posted as a GitHub comment (--github-pr flag).
+instructions: >
+  This sub-skill performs a high-fidelity quality analysis across 15 dimensions to 
+  ensure features or projects meet engineering standards. It utilizes a call-graph 
+  discipline to identify deep-seated bugs and provides structured feedback for merge readiness.
 ---
 
 # Code Forge — Review

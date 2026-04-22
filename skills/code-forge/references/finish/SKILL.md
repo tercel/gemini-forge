@@ -4,6 +4,11 @@ description: >
   Use when implementation is complete and you need to merge, create a PR, or clean up —
   verifies tests pass, presents 4 structured integration options, executes chosen workflow,
   and cleans up worktrees. Pairs with code-forge:worktree.
+instructions: >
+  This sub-skill finalizes feature development by verifying tests and offering 
+  structured integration options like local merges or Pull Requests. It includes 
+  a mandatory simplification gate to detect and remove bloat before cleaning up 
+  worktrees and temporary planning files.
 ---
 
 # Code Forge — Finish

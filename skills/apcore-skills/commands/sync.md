@@ -8,12 +8,6 @@ description: 'Unified cross-language consistency verification and documentation 
   Includes cross-language example scenario coverage and test scenario coverage comparison.
   Optionally hands off behavioral equivalence to the `tester` skill. Covers both apcore
   core SDKs and apcore-mcp bridges.'
-argument-hint: /apcore-skills:sync [repo1,repo2,...] [--phase a|b|all] [--fix] [--scope
-  core|mcp|all] [--lang python,typescript,...] [--internal-check none|contract|skeleton|behavior]
-  [--deep-chain on|off] [--save]
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
 ---
 # Apcore Skills — Sync
 

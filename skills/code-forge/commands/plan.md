@@ -1,12 +1,5 @@
 ---
-description: Analyze documentation (or a prompt) and generate an implementation plan
-  with task breakdown, TDD steps, and progress tracking. Use when breaking down a
-  feature, creating tasks from docs or requirements, planning implementation work,
-  or turning a spec into actionable steps.
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Analyze documentation (or a prompt) and generate an implementation plan with task breakdown, TDD steps, and progress tracking."
 ---
 # Code Forge — Plan
 

@@ -5,6 +5,10 @@ description: >
   and progress tracking. Use when starting to build, implement, or code a planned feature,
   resuming partially completed work, or running the next task in a code-forge plan.
   Supports --repos flag for parallel implementation across multiple repositories.
+instructions: >
+  This sub-skill executes pending implementation tasks for a feature using a TDD-driven 
+  approach isolated within sub-agents. It manages task coordination, tracks progress 
+  in state files, and ensures all changes align with project standards and architecture.
 ---
 
 # Code Forge — Impl

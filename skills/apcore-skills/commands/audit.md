@@ -3,11 +3,6 @@ description: Deep cross-repo consistency audit for the apcore ecosystem. Checks 
   surface alignment, naming conventions, version synchronization, documentation quality,
   test coverage, dependency alignment, and configuration consistency across all repos.
   Generates a detailed report with severity-classified findings.
-argument-hint: /apcore-skills:audit [--scope core|mcp|integrations|all] [--fix] [--no-deep-chain]
-  [--save report.md]
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
 ---
 # Apcore Skills — Audit
 

@@ -4,6 +4,10 @@ description: >
   Use when encountering any bug, test failure, or unexpected behavior — enforces
   root cause investigation before fixes. Prevents symptom-fixing, masking bugs, and
   "just try this" approaches. For code-forge features, use code-forge:fix instead.
+instructions: >
+  This sub-skill enforces a rigorous root-cause investigation process for any technical 
+  issue before attempting a fix. It guides the developer through reproduction, pattern 
+  analysis, and hypothesis testing to ensure bugs are understood at their source.
 ---
 
 # Code Forge — Debug

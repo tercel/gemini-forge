@@ -3,11 +3,6 @@ description: Bootstrap a new framework integration for apcore. Scaffolds the pro
   with endpoint scanners, configuration system, context mapping, CLI commands, demo
   project, and Docker setup. Learns patterns from existing integrations (django-apcore,
   flask-apcore, nestjs-apcore).
-argument-hint: /apcore-skills:integration <framework> [--lang python|typescript|go]
-  [--ref django-apcore]
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
 ---
 # Apcore Skills — Integration
 

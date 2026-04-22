@@ -1,0 +1,3 @@
+description = "Ecosystem-wide consistency audit for compatibility and standards."
+argument-hint = "[--scope <scope>]"
+prompt = "Activating apcore-skills:audit. Please perform an ecosystem-wide consistency audit: {{args}}"

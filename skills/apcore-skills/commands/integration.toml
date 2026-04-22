@@ -1,0 +1,3 @@
+description = "Bootstrap a new framework integration for apcore."
+argument-hint = "<framework>"
+prompt = "Activating apcore-skills:integration. Please guide through the framework integration bootstrapping for: {{args}}"

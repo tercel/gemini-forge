@@ -1,0 +1,2 @@
+description = "Verify work before claiming completion."
+prompt = "Activating code-forge:verify. Please run the verification checklist and commands."

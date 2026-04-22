@@ -1,0 +1,3 @@
+description = "Cross-language API + documentation consistency verification and alignment."
+argument-hint = "[repos...]"
+prompt = "Activating apcore-skills:sync. Please perform consistency verification and alignment for: {{args}}"

@@ -4,6 +4,10 @@ description: >
   Use when starting feature work that needs workspace isolation — creates git worktree
   with automatic project setup and baseline test verification. Ensures worktree directory
   is git-ignored and safe. Integrates with code-forge:impl and code-forge:finish.
+instructions: >
+  This sub-skill automates the creation of isolated git worktrees for feature development, 
+  ensuring a clean and git-ignored workspace. It handles project setup and establishes 
+  a baseline test status to prevent pre-existing failures from masking new regressions.
 ---
 
 # Code Forge — Worktree

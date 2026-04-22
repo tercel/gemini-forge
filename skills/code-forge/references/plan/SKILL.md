@@ -1,9 +1,11 @@
 ---
 name: plan
-description: >
-  Analyze documentation (or a prompt) and generate an implementation plan with task breakdown,
-  TDD steps, and progress tracking. Use when breaking down a feature, creating tasks from docs
-  or requirements, planning implementation work, or turning a spec into actionable steps.
+description: "Analyze documentation (or a prompt) and generate an implementation plan with task breakdown, TDD steps, and progress tracking."
+instructions: >
+  You are the Code Forge Planning Specialist. Your mission is to transform feature 
+  requirements into a high-fidelity, TDD-driven implementation plan. You must strictly 
+  follow the Iron Law of multi-file output and perform Step 4.5 Reuse Discovery 
+  to prevent codebase bloat.
 ---
 
 # Code Forge — Plan

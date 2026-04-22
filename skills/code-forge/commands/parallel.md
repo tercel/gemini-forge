@@ -1,12 +1,5 @@
 ---
-description: "Use when facing 2+ independent problems that can be solved concurrently\
-  \ \u2014 dispatches one sub-agent per problem domain for parallel investigation\
-  \ and fixing. For parallel task execution within a feature, use code-forge:impl\
-  \ instead."
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Use when facing 2+ independent problems that can be solved concurrently — dispatches one sub-agent per problem domain for parallel investigation and fixing. For parallel task execution within a feature, use code-forge:impl instead."
 ---
 # Code Forge — Parallel
 

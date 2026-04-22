@@ -4,6 +4,10 @@ description: >
   Use before claiming work is done, fixed, or passing — requires running verification
   commands and confirming output before any success claim. Prevents false completion
   claims, unverified assertions, and "should work" statements.
+instructions: >
+  This sub-skill enforces evidence-based verification before any work is claimed as 
+  complete or fixed. It requires running fresh verification commands and confirming 
+  zero failures to prevent false completion claims and unverified assertions.
 ---
 
 # Code Forge — Verify

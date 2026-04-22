@@ -1,13 +1,5 @@
 ---
-description: "Port a documentation-driven project to a new target language \u2014\
-  \ initializes project skeleton, analyzes reference implementation, and batch-generates\
-  \ plans for selected features. Use when converting a project to another language,\
-  \ rewriting in a different language, or creating a multi-language SDK from existing\
-  \ feature specs."
-argument-hint: /code-forge:port @<docs-project> --ref <reference-impl> --lang <target-language>
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Port a documentation-driven project to a new target language — initializes project skeleton, analyzes reference implementation, and batch-generates plans for selected features. Use when converting a project to another language, rewriting in a different language, or creating a multi-language SDK from existing feature specs."
 ---
 # Code Forge — Port
 

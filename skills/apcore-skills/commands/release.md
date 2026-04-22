@@ -3,11 +3,6 @@ description: Coordinated multi-repo release pipeline for the apcore ecosystem. H
   version bumps across all version files, CHANGELOG generation from git history, cross-repo
   dependency updates, test verification, and staged commits. Only pushes after explicit
   user approval.
-argument-hint: /apcore-skills:release <version> [--scope core|mcp|integrations|all]
-  [--dry-run]
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
 ---
 # Apcore Skills — Release
 

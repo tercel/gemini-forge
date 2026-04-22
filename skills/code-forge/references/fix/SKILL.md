@@ -4,6 +4,10 @@ description: >
   Debug and fix bugs with interactive upstream trace-back — diagnoses root cause level,
   confirms upstream document updates, and applies TDD fixes.
   Supports --repos flag for parallel bug fixing across multiple repositories.
+instructions: >
+  This sub-skill systematically diagnoses and fixes bugs by tracing root causes back 
+  to their source in code, plans, or requirements. It ensures that both the code and 
+  upstream documentation are kept in sync while following a strict TDD methodology for the fix.
 ---
 
 # Code Forge — Fix

@@ -1,15 +1,5 @@
 ---
-description: "Use when implementing any feature or fix outside code-forge workflow\
-  \ \u2014 enforces Red-Green-Refactor cycle with mandatory test-first discipline.\
-  \ Supports three modes: (1) Standalone \u2014 ad-hoc TDD for quick changes, (2)\
-  \ Auto-Analysis \u2014 runs the full spec-forge:test-cases analysis pipeline (project\
-  \ profile, four-layer deep scan, multi-dimensional coverage) then implements all\
-  \ cases via TDD, (3) Driven \u2014 reads a test-cases.md document and implements\
-  \ each case via TDD."
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Use when implementing any feature or fix outside code-forge workflow — enforces Red-Green-Refactor cycle with mandatory test-first discipline. Supports three modes: (1) Standalone — ad-hoc TDD for quick changes, (2) Auto-Analysis — runs the full spec-forge:test-cases analysis pipeline (project profile, four-layer deep scan, multi-dimensional coverage) then implements all via TDD, (3) Driven — reads a test-cases.md document and implements each case via TDD."
 ---
 # Code Forge — TDD
 

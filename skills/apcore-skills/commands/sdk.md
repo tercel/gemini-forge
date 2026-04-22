@@ -3,10 +3,6 @@ description: "Bootstrap and implement a new language SDK for the apcore ecosyste
   \ Scaffolds the project structure, extracts API contract, then automatically continues\
   \ with code-forge:port (plan generation) and code-forge:impl (TDD implementation)\
   \ to deliver a fully implemented SDK \u2014 not just stubs."
-argument-hint: /apcore-skills:sdk <language> [--type <type>] [--ref <repo>]
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
 ---
 # Apcore Skills — SDK
 

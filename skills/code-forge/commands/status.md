@@ -1,11 +1,5 @@
 ---
-description: Display code-forge feature dashboard with task-level progress from state.json,
-  or show detailed status for a specific feature. Use when checking progress, asking
-  "what's left", viewing task completion, or wanting a bird's-eye view of the project.
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Display code-forge feature dashboard with task-level progress from state.json, or show detailed status for a specific feature. Use when checking progress, asking \"what's left\", viewing task completion, or wanting a bird's-eye view of the project."
 ---
 # Code Forge — Status
 

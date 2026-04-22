@@ -1,0 +1,2 @@
+description = "Dispatch parallel agents for independent problems."
+prompt = "Activating code-forge:parallel. Please identify independent problem domains and dispatch parallel sub-agents."

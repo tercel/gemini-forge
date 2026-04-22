@@ -1,11 +1,5 @@
 ---
-description: "Use when implementation is complete and you need to merge, create a\
-  \ PR, or clean up \u2014 verifies tests pass, presents 4 structured integration\
-  \ options, executes chosen workflow, and cleans up worktrees. Pairs with code-forge:worktree."
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Use when implementation is complete and you need to merge, create a PR, or clean up — verifies tests pass, presents 4 structured integration options, executes chosen workflow, and cleans up worktrees. Pairs with code-forge:worktree."
 ---
 # Code Forge — Finish
 

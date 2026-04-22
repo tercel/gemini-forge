@@ -5,6 +5,10 @@ description: >
   analyzes reference implementation, and batch-generates plans for selected features. Use when
   converting a project to another language, rewriting in a different language, or creating a
   multi-language SDK from existing feature specs.
+instructions: >
+  This sub-skill manages the process of porting a documentation-driven project to a new 
+  target language. It initializes the target project skeleton and batch-generates 
+  implementation plans from existing feature specs while maintaining idiomatic consistency.
 ---
 
 # Code Forge — Port

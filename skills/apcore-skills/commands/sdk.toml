@@ -1,0 +1,3 @@
+description = "Bootstrap and implement a new language SDK for the apcore ecosystem."
+argument-hint = "<language> [--type <type>] [--ref <repo>]"
+prompt = "Activating apcore-skills:sdk. Please guide through the SDK bootstrapping and implementation for: {{args}}"

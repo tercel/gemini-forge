@@ -1,12 +1,5 @@
 ---
-description: "Use when starting feature work that needs workspace isolation \u2014\
-  \ creates git worktree with automatic project setup and baseline test verification.\
-  \ Ensures worktree directory is git-ignored and safe. Integrates with code-forge:impl\
-  \ and code-forge:finish."
-argument-hint: ''
-allowed-tools: read_file, glob, grep_search, write_file, replace, run_shell_command,
-  ask_user, generalist, codebase_investigator, tracker_create_task, tracker_update_task,
-  tracker_list_tasks
+description: "Create an isolated git worktree with project setup."
 ---
 # Code Forge — Worktree
 

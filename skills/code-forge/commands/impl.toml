@@ -1,0 +1,3 @@
+description = "Execute pending tasks for a feature using TDD-driven implementation."
+argument-hint = "<feature-name>"
+prompt = "Activating code-forge:impl. Please execute the implementation tasks for feature: {{args}}"
