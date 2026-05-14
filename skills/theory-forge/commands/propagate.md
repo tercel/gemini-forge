@@ -1,49 +1,81 @@
 ---
-description: "Propagate upstream theory doc changes downstream to maintain project-wide consistency."
+description: "Use after editing an upstream academic theory doc (foundation, glossary, definition section) to propagate the change downstream — keeps glossary, manifesto, methodology, and foundations docs consistent"
 argument-hint: "[@source-doc.md] [--since git-ref] [--dry-run] [--save]"
 ---
 
 You are a senior academic editor responsible for keeping a theory project's doc chain coherent. Your task is to propagate changes for: **$ARGUMENTS**
 
-## Step 1: Determine Source
+## Workflow
+
+### Step 1: Determine Source
 
 Parse `$ARGUMENTS`:
-- Use `@source-doc.md` if provided.
-- Use `--since {git-ref}` if provided.
-- Otherwise, auto-detect using `run_shell_command` with `git status` and `git diff`.
-- Exclude `_research/`, `_drafts/`, and underscore-prefixed paths.
+- If `@source-doc.md` is provided, that is the source
+- If `--since {git-ref}` is provided, the source is all `.md` files in `docs/` changed between that ref and `HEAD`
+- Otherwise, auto-detect from `git status --porcelain` (uncommitted) or `git diff HEAD~1 HEAD`
+- Exclude `_research/`, `_drafts/`, underscore-prefixed paths
 
-If no source is detected, inform the user and stop.
+If no source can be detected:
 
-## Step 2: Launch Propagate
+```
+No doc changes detected. Provide an explicit @source-doc.md or use --since {ref}.
+```
 
-Invoke the `generalist` sub-agent with the instructions from `../references/propagate-workflow.md`.
+and stop.
 
-**Instructions for the sub-agent:**
+### Step 2: Launch Propagate
+
+Invoke `invoke_agent(agent_name="generalist")` with the following prompt:
 
 ---
 
-You are responsible for propagating academic theory documentation changes downstream. Follow the workflow in `../references/propagate-workflow.md`.
+You are responsible for propagating academic theory documentation changes from an upstream foundation doc downstream through the doc chain.
 
 **Source documents**: {resolved source files}
 **Mode**: {normal | dry-run}
 
-### Core Principles
-1. **Source of Truth**: Upstream documents (foundations, glossaries) are the truth.
-2. **Surgical Edits**: Use `replace` for surgical changes; never overwrite with `write_file`.
-3. **Interactive Review**: Always ask user approval for LOW-confidence or AMBIGUOUS changes using `ask_user`.
+Read the propagate workflow definition at:
+`../references/propagate-workflow.md`
 
-### Tool Usage
-- Use `read_file` to extract changed concepts from source.
-- Use `grep_search` to find downstream references (direct mentions, cross-refs, etc.).
-- Use `replace` to apply changes downstream.
-- Use `write_file` to generate the report at `_research/propagation-report-{timestamp}.md`.
+Follow every step of the workflow exactly:
+1. Step 1 (Determine Source) is already done — use the resolved sources above
+2. Continue from Step 2 (Extract Changed Concepts) — renamed constructs, definition revisions, retracted/new citations, renumbered sections
+3. Step 3 (Discover Downstream References) — grep for direct mentions, cross-refs, citation reuse, glossary entries, inline `see X §N`, mermaid nodes, anchor links
+4. Step 4 (Per-Downstream Impact Analysis) — parallel sub-agents, max 4 at a time, classify each reference HIGH/MEDIUM/LOW/AMBIGUOUS
+5. Step 5 (Interactive Review) — AskUserQuestion per downstream file
+6. Step 6 (Apply Changes) — surgical Edit only, never Write
+7. Step 7 (Verify) — re-grep for stale references; suggest re-running consistency / cite-audit
+8. Step 8 (Report) — write `_research/propagation-report-{timestamp}.md`
 
-### Reporting
-Use the template at `../templates/propagation-report.md`. Summarize concepts changed, refs found, and auto-applied vs manual changes.
+Key rules:
+- Never modify the source documents — they are the upstream truth
+- Never use `Write` to overwrite a downstream file — use `Edit` for surgical changes
+- Never auto-apply LOW-confidence or AMBIGUOUS changes — always ask the user
+- Skip `_research/`, `_drafts/`, underscore-prefixed paths as downstream targets
+- Surface every stale reference that survives the propagation as a `STILL_STALE` warning
+- If `--dry-run`, generate the full report but apply nothing
 
 ---
 
-## Step 3: Present Results
+### Step 3: Present Results
 
-After the sub-agent returns, display the propagation summary and suggest next steps (git diff, commit, re-run audits).
+After the sub-agent returns, display the propagation summary it produced and suggest next steps:
+
+```
+Propagation complete.
+
+Report: {target}/_research/propagation-report-{timestamp}.md
+
+Summary:
+  Concepts changed:        {n}
+  Downstream refs found:   {n}
+  Auto-applied (HIGH):     {n}
+  Manually confirmed:      {n}
+  STILL_STALE warnings:    {n}
+
+Next steps:
+  Review the diff:           git diff
+  Commit:                    git add docs/ && git commit -m "docs: propagate {source} change"
+  Re-run consistency check:  /theory-forge:consistency
+  Re-run citation audit:     /theory-forge:cite-audit (if citations changed)
+```

@@ -1,44 +1,66 @@
 ---
-description: "Audit cross-section semantic coherence in academic theory documents — catches formal-definition drift and direct contradictions."
+description: "Use when auditing cross-section semantic coherence in academic theory documents — catches formal-definition drift and direct contradictions between sections"
 argument-hint: "[path-to-project]"
 ---
 
 You are a senior academic editor specializing in textual consistency analysis. Your task is to audit the cross-section coherence of: **$ARGUMENTS**
 
-## Step 1: Determine Target
+## Workflow
+
+### Step 1: Determine Target
 
 Parse `$ARGUMENTS`:
-- If a path is provided, use it as the project root.
-- If empty, use the current working directory.
-- Verify the target has documentation (`docs/`, markdown files).
+- If a path is provided, use it as the project root
+- If empty, use the current working directory
+- Verify the target has documentation (`docs/`, markdown files)
 
-## Step 2: Launch Audit
+### Step 2: Launch Audit
 
-Invoke the `generalist` sub-agent with the instructions from `../references/consistency-workflow.md`.
-
-**Instructions for the sub-agent:**
+Invoke `invoke_agent(agent_name="generalist")` with the following prompt:
 
 ---
 
-You are a senior academic editor specializing in textual consistency analysis. Follow the workflow in `../references/consistency-workflow.md` to audit the project at `{resolved path}`.
+You are a senior academic editor specializing in textual consistency analysis. Your task is to audit a theory documentation project for cross-section semantic coherence.
 
-### Core Principles
-1. **Definition vs Narrative**: Definition sections (T3) are the source of truth. Narrative should not contradict them.
-2. **Granularity-Aware**: Don't flag glossaries (T1) or intros (T2) for being less exhaustive than formal specs (T3).
-3. **Quote Contradictions**: Every finding must quote the exact two strings that disagree.
+**Target project**: {resolved path}
 
-### Tool Usage
-- Use `read_file` to identify definition sections and extract component lists.
-- Use `glob` to scan the entire document corpus.
-- Use `grep_search` to find narrative mentions of constructs.
-- Use `write_file` to generate the report at `{target}/_research/consistency-report.md`.
+Read the consistency workflow definition at:
+`../references/consistency-workflow.md`
 
-### Reporting
-Use the template at `../templates/consistency-report.md`. Classify by severity: Critical (factual contradiction in central definition), Major (definition drift), Minor (alias drift), Info (nuance difference).
+Also read the shared severity rubric at:
+`../references/academic-severity-levels.md`
+
+Follow every step of the consistency workflow exactly.
+
+Key rules:
+- Every finding must quote the exact two strings that disagree
+- For each Major finding, propose which section should change and why
+- Classify by severity: Critical (rare — direct factual contradiction in central definition), Major (formal-definition drift, citation attribution conflict, component-list mismatch repeated ≥2x), Minor (single narrative assertion, alias drift), Info (less-nuanced vs more-nuanced)
+- Generate the report at `{target}/_research/consistency-report.md`
+- Do not report stylistic preferences as findings
+- Do not flag a narrative section for being terser than the definition section — narrative is allowed to be terse
 
 ---
 
-## Step 3: Present Results
+### Step 3: Present Results
 
-After the sub-agent returns, display the summary (Critical, Major, Minor, Info) and the path to the report.
-Offer to propose specific text edits for Major issues using `ask_user`.
+After the sub-agent returns, display:
+
+```
+Consistency audit complete.
+
+Report: {target}/_research/consistency-report.md
+
+Summary:
+  Critical: {n}
+  Major:    {n}    ← formal-definition drift, citation conflicts
+  Minor:    {n}
+  Info:     {n}
+
+Status: {PASS / REVIEW REQUIRED}
+
+Next steps:
+  Review the report and decide which side of each disagreement is the source of truth
+  Re-run /theory-forge:consistency after fixes to verify
+  Use /theory-forge:propagate after fixing a definition to update all downstream sections
+```

@@ -1,49 +1,77 @@
 ---
-description: "Audit citations for truth, attribution, and bibliography completeness — catches fabricated citations, mis-attribution, orphans, and unused entries."
+description: "Use when auditing every citation in an academic theory project for truth, attribution, and bibliography completeness — catches fabricated citations, mis-attribution, orphans, and unused entries via CrossRef / Semantic Scholar / OpenAlex"
 argument-hint: "[path-to-project]"
 ---
 
 You are a senior academic editor and citation-integrity specialist. Your task is to audit the citations in: **$ARGUMENTS**
 
-## Step 1: Determine Target
+## Workflow
+
+### Step 1: Determine Target
 
 Parse `$ARGUMENTS`:
-- If a path is provided, use it as the project root.
-- If empty, use the current working directory.
-- Verify the target has documentation (`docs/`, markdown files).
-- Locate the bibliography file (e.g., `docs/**/bibliography.md`, `references.md`, `## References` in `README.md`).
+- If a path is provided, use it as the project root
+- If empty, use the current working directory
+- Verify the target has documentation (`docs/`, markdown files at root, or both)
+- Verify the target has a bibliography file (`docs/**/bibliography.md`, `references.md`, or a `## References` section in `README.md`)
 
-If no bibliography is found, ask the user for the location or if they want to treat all citations as orphans.
+If no bibliography is found, ask the user:
+- Where is the bibliography located?
+- Or: should I treat this as a project that has no bibliography yet, and report all citations as orphans?
 
-## Step 2: Launch Audit
+### Step 2: Launch Audit
 
-Invoke the `generalist` sub-agent with the instructions from `../references/cite-audit-workflow.md`.
-
-**Instructions for the sub-agent:**
-
----
-
-You are a senior academic editor and citation-integrity specialist. Follow the workflow in `../references/cite-audit-workflow.md` to audit the citations in the project at `{resolved path}`.
-
-### Core Principles
-1. **Conservative on Critical**: Only mark "Fabricated" if multiple sources (CrossRef, Semantic Scholar, OpenAlex) fail.
-2. **Read-only by default**: Do not edit files without explicit user approval.
-3. **Precise Citations**: Include file path, line number, and claim text for every finding.
-
-### Tool Usage
-- Use `read_file` to scan documentation and bibliography.
-- Use `glob` to find all markdown files.
-- Use `web_fetch` to verify paper existence (CrossRef: `https://api.crossref.org/works?...`).
-- Use `write_file` to generate the report at `{target}/_research/citation-audit.md`.
-
-### Reporting
-Use the template at `../templates/cite-audit-report.md`. Classify findings: Critical (fabricated), Major (mis-attribution/orphan), Minor (unused/malformed), Info (unverifiable).
+Invoke `invoke_agent(agent_name="generalist")` with the following prompt:
 
 ---
 
-## Step 3: Present Results
+You are a senior academic editor and citation-integrity specialist. Your task is to audit the citations in an academic theory project for truth, attribution, and bibliography completeness.
 
-After the sub-agent returns, display the summary of findings (Critical, Major, Minor, Info) and the path to the report.
+**Target project**: {resolved path}
+**Bibliography**: {resolved bibliography path}
 
-If Critical findings exist, emphasize that they require manual review.
-If only Major/Minor exist, offer to auto-fix orphans with high-confidence matches using `ask_user`.
+Read the cite-audit workflow definition at:
+`../references/cite-audit-workflow.md`
+
+Also read these shared assets:
+- `../references/citation-parser.md` — inline-citation regex set + bibliography schema + WebFetch query construction
+- `../references/citation-format.md` — style detection
+- `../references/academic-severity-levels.md` — severity rubric
+
+Follow every step of the cite-audit workflow exactly. Skip path resolution in Step 1 (already resolved above).
+
+Key rules:
+- Every finding must cite the specific file, line number, and surrounding claim text — no vague complaints
+- Use CrossRef → Semantic Scholar → OpenAlex in that order to verify paper existence
+- Be conservative on "Fabricated" findings: only mark as fabricated when all three sources return zero matches AND the title has ≥3 specific content words
+- Classify findings: Critical (fabricated), Major (mis-attribution / orphan), Minor (unused / ambiguous / malformed), Info (unverifiable)
+- Generate the report at `{target}/_research/citation-audit.md` (create the directory if needed)
+- Be honest — don't inflate findings; if WebFetch is rate-limited or fails, report partial results and flag the limitation rather than guessing
+
+---
+
+### Step 3: Present Results
+
+After the sub-agent returns, display:
+
+```
+Citation audit complete.
+
+Report: {target}/_research/citation-audit.md
+
+Summary:
+  Critical: {n}   ← review before publication
+  Major:    {n}
+  Minor:    {n}
+  Info:     {n}
+
+Status: {PASS / REVIEW REQUIRED}
+
+Next steps:
+  Review the report and decide on fixes
+  Re-run /theory-forge:cite-audit after fixes to verify
+  Use /theory-forge:consistency for cross-section component-list checking
+  Use /theory-forge to run the full audit suite
+```
+
+If `_research/` was newly created, remind the user to add it to `.gitignore`.

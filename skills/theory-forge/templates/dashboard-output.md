@@ -94,7 +94,8 @@ GETTING HELP
   /theory-forge:help <command>                 # e.g. /theory-forge:help cite-audit
 
 Full reference:
-  SKILL.md  — overview, design principles, counter-argument engagement
+  README.md  — overview, design principles, counter-argument engagement
+  docs/usage.md  — end-to-end workflow recipes (5 recipes)
   _research/self-audit-report.md  — known gaps in this tool itself
 ```
 
@@ -119,20 +120,21 @@ Usage:
   {full Usage block from the command file's "Usage Examples" section}
 
 Output:
-  {output file path — extracted from {command}-workflow.md "Report Generation" step}
+  {output file path — extracted from references/{command}-workflow.md "Report Generation" step}
 
 WebFetch:
-  {yes/no, with which services if yes — extracted from {command}-workflow.md or command allowed-tools}
+  {yes/no, with which services if yes — extracted from references/{command}-workflow.md or command allowed-tools}
 
 Anti-patterns / safety guards:
-  {bulleted list, sourced verbatim from the {command}-workflow.md's Anti-patterns section}
+  {bulleted list, sourced verbatim from the references/{command}-workflow.md's Anti-patterns section}
 
 Severity rules (summary):
   {one-line summary per severity level — extracted from references/academic-severity-levels.md severity table}
 
 See also:
-  SKILL.md  — overview
+  README.md §{command name}  — overview
   references/{command}-workflow.md  — full operational manual
+  docs/usage.md  — workflow recipes that use this command
 ```
 
 For an unknown command (`/theory-forge help foo`):

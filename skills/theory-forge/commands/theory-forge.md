@@ -52,6 +52,8 @@ Display theory-forge dashboard:
 
 Then stop.
 
+> **Note on token economy:** the dashboard template is NOT inlined here. It lives in `../templates/dashboard-output.md` and is read only when actually rendering. This keeps `commands/theory-forge.md` lean for the common case of routing to a sub-command.
+
 ### Route A-help: `help` or `help <command>`
 
 If the user types `/theory-forge help` (no command argument):
@@ -60,7 +62,7 @@ If the user types `/theory-forge help` (no command argument):
 
 If the user types `/theory-forge help <command>` (e.g. `/theory-forge help cite-audit`):
 1. Verify `<command>` is one of: cite-audit, consistency, falsifiability, argument-structure, scope, concept-import, counter-argument, cross-lang, propagate.
-2. If unknown: print the "Unknown command" template (in `dashboard-output.md` §"Unknown command").
+2. If unknown: print the "Unknown command" template (in `../templates/dashboard-output.md` §"Unknown command").
 3. If known: read `./{command}.md` (for description, argument-hint, Usage Examples) and `../references/{command}-workflow.md` (for Anti-patterns + severity rules).
 4. Render the "Detailed help" template (in `../templates/dashboard-output.md` §"Detailed help"), filling in the per-command values.
 
@@ -78,13 +80,13 @@ This is a hand-off — load and execute that command's workflow (read the file a
 
 ### Route C: `full-suite` — Run all audits (parallel-wave execution)
 
-This is the orchestrator's core value-add. **Execution model: two parallel waves of 4 audits each.** All 8 audits are mutually independent.
+This is the orchestrator's core value-add. **Execution model: two parallel waves of 4 audits each.** All 8 audits are mutually independent (no inter-audit data dependency). The parallel-wave model exploits this independence for ~4× wall-clock speedup while maintaining safety.
 
 **Wave 1** (launch all 4 in a single message via parallel `invoke_agent` calls):
 
 | Audit | Why this wave | WebFetch |
 |---|---|---|
-| `cite-audit` | Largest single audit (WebFetch-bound) | **yes** |
+| `cite-audit` | Largest single audit (WebFetch-bound) — start it earliest | **yes** |
 | `consistency` | Local-only, fast | no |
 | `falsifiability` | Local-only, fast | no |
 | `cross-lang` | Local-only, independent | no |
@@ -93,10 +95,12 @@ This is the orchestrator's core value-add. **Execution model: two parallel waves
 
 | Audit | Why this wave |
 |---|---|
-| `argument-structure` | UX consideration |
-| `scope` | UX rationale |
+| `argument-structure` | Falls in Wave 2 because some readers find it most useful after seeing falsifiability output |
+| `scope` | Similar UX rationale |
 | `concept-import` | Independent |
 | `counter-argument` | Independent |
+
+**`propagate`** is skipped in full-suite mode — it requires a specific upstream-edited doc as input.
 
 #### Wave execution mechanic
 
@@ -122,14 +126,31 @@ Wait for all four results.
 Aggregate.
 ```
 
-Each launch prompt is identical to what the individual command file (e.g., `./cite-audit.md`) uses.
+Each launch prompt is identical to what the individual command file (e.g., `./cite-audit.md`) uses — the orchestrator reuses those prompts verbatim.
 
-**Failure handling**: if any Wave 1 sub-agent fails, capture the failure and proceed to Wave 2.
+**Failure handling**: if any Wave 1 sub-agent fails (timeout, network error, etc.), capture the failure and proceed to Wave 2 — do not block Wave 2 on Wave 1 failures. The master report flags any failed audit clearly.
+
+#### Sequential fallback (`--sequential` flag)
+
+For users who prefer sequential execution, the `--sequential` flag falls back to the previous behavior:
+
+```
+/theory-forge . --sequential
+```
+
+In sequential mode, the orchestrator runs each audit in turn (cite-audit → consistency → falsifiability → argument-structure → scope → concept-import → counter-argument → cross-lang).
 
 After both waves complete, write the master report at `_research/theory-forge-master-report.md`.
 
-**Report structure**: read the template at `../templates/master-report.md` and fill in the `{placeholder}` values.
+**Report structure**: read the template at `../templates/master-report.md` and fill in the `{placeholder}` values across the Aggregate Summary, Cross-Audit Patterns, and Recommended Fix Order sections. The template is loaded only at this step.
 
 ### Step 3: Present Results
 
-After all sub-audits complete, display the aggregate summary and recommend the top 3 fixes.
+After all sub-audits complete, display the aggregate summary and recommend the top 3 fixes by severity × cross-audit overlap.
+
+## Notes
+
+- The orchestrator does not run `propagate` in full-suite mode because `propagate` requires a specific changed-document argument.
+- If WebFetch is unavailable, only `cite-audit` is affected — it produces a partial report flagged as such.
+- The orchestrator never auto-applies fixes. Each sub-audit's fix offer runs independently if invoked directly; in full-suite mode all fix offers are deferred until the master report is presented.
+- **Critical findings escalate.** If any sub-audit produces a Critical finding, the master report's status is `REVIEW REQUIRED — CRITICAL` and the fix-offer is suppressed until the user acknowledges.

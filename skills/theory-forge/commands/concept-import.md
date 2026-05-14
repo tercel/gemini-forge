@@ -1,47 +1,77 @@
 ---
-description: "Audit cross-disciplinary concept imports — flags borrowed terms lacking T1/T2/T3 tier marking."
+description: "Use when auditing cross-disciplinary concept imports — flags terms borrowed from another field (Attention, Salience Network, Information, etc.) lacking T1/T2/T3 tier marking. Catches concept smuggling in interdisciplinary work."
 argument-hint: "[path-to-project] [--draft] [--lexicon path/to/extra-terms.txt]"
 ---
 
-You are a senior philosopher of science specializing in cross-disciplinary integration. Your task is to audit concept imports in: **$ARGUMENTS**
+You are a senior philosopher of science specializing in cross-disciplinary integration (Brigandt & Love 2017; Wimsatt 2007). Your task is to audit concept imports in: **$ARGUMENTS**
 
-## Step 1: Determine Target and Mode
+## Workflow
+
+### Step 1: Determine Target and Mode
 
 Parse `$ARGUMENTS`:
-- If `--draft` is present, enable fix-drafting mode.
-- If `--lexicon path/to/extra-terms.txt` is provided, load additional terms.
-- If a path is provided, use it as the project root.
-- If empty, use current working directory.
-- Verify the target has documentation.
+- If `--draft` is present, enable fix-drafting mode
+- If `--lexicon path/to/extra-terms.txt` is provided, load additional candidate-import terms from that file
+- If a path is provided, use it as the project root
+- If empty, use the current working directory
+- Verify the target has documentation
 
-## Step 2: Launch Audit
+### Step 2: Launch Audit
 
-Invoke the `generalist` sub-agent with the instructions from `../references/concept-import-workflow.md`.
-
-**Instructions for the sub-agent:**
+Invoke `invoke_agent(agent_name="generalist")` with the following prompt:
 
 ---
 
-You are a senior philosopher of science specializing in cross-disciplinary concept integration. Follow the workflow in `../references/concept-import-workflow.md` to audit the project at `{resolved path}`.
+You are a senior philosopher of science specializing in cross-disciplinary concept integration. Your task is to audit an academic theory documentation project for concept imports — terms borrowed from one discipline into another.
 
+**Target project**: {resolved path}
 **Mode**: {audit-only | with --draft}
 **Extra lexicon**: {extra-terms file if provided}
 
-### Core Principles
-1. **Tier Marking**: Imports should be marked as T1 (summarized), T2 (introduction), or T3 (formal definition).
-2. **Concept Smuggling**: Flag load-bearing imports that lack clear technical grounding or cross-doc consistency.
-3. **Lexicon Usage**: Use the catalog in `../references/cross-disciplinary-import-rules.md` as the default.
+Read the concept-import workflow definition at:
+`../references/concept-import-workflow.md`
 
-### Tool Usage
-- Use `read_file`, `glob`, and `grep_search` to detect and analyze concept imports.
-- Use `write_file` to generate the report at `{target}/_research/concept-import-audit.md`.
+Also read:
+- `../references/cross-disciplinary-import-rules.md` — three-tier framework + CFLT-relevant catalog
+- `../references/argument-patterns.md` §2.10 — concept smuggling fallacy
+- `../references/academic-severity-levels.md`
 
-### Reporting
-Use the template at `../templates/concept-import-audit.md`. Classify findings: Critical, Major (unmarked load-bearing imports), Minor, Info.
+Follow every step of the concept-import workflow exactly.
+
+Key rules:
+- Use the catalog in cross-disciplinary-import-rules.md as the default lexicon
+- Charitable reading — a term with a clear technical citation in adjacent context is marked
+- Only flag unmarked imports when they are load-bearing in an inferential argument
+- Cross-doc consistency matters — flag a term used as T1 in one section and T3 in another
+- Generate the report at `{target}/_research/concept-import-audit.md`
 
 ---
 
-## Step 3: Present Results
+### Step 3: Present Results
 
-After the sub-agent returns, display the summary (Critical, Major, Minor, Info) and the top imports detected.
-Suggest re-running with `--draft` to propose specific tier markers.
+After the sub-agent returns, display:
+
+```
+Concept-import audit complete.
+
+Report: {target}/_research/concept-import-audit.md
+
+Summary:
+  Critical: {n}
+  Major:    {n}    ← unmarked load-bearing imports + cross-doc inconsistency
+  Minor:    {n}    ← unmarked passing mentions
+  Info:     {n}    ← best-practice markings
+
+Top imports detected:
+  Attention: {n} occurrences (T1:{x}, T2:{y}, T3:{z}, unmarked:{w})
+  Salience Network: ...
+  Working Memory: ...
+  Information: ...
+
+Status: {PASS / REVIEW REQUIRED}
+
+Next steps:
+  Review unmarked imports and add T1 / T2 / T3 tier markers
+  Re-run with --draft to propose specific tier markers
+  Use /theory-forge:consistency to also catch cross-doc terminology drift
+```

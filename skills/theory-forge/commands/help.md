@@ -1,5 +1,5 @@
 ---
-description: "Display theory-forge command reference and usage examples."
+description: "Display theory-forge command reference and usage examples. Invoke as /theory-forge:help or /theory-forge help [command-name]."
 argument-hint: "[command-name]"
 ---
 
@@ -7,14 +7,19 @@ You are the theory-forge help display. The user invoked: `/theory-forge help $AR
 
 ## Workflow
 
-1. Read `../templates/dashboard-output.md` (the source of truth for help content).
+1. Read `../templates/dashboard-output.md` (the single source of truth for all help content).
 
 2. Parse `$ARGUMENTS`:
-   - **Empty** → Render the "Help view" section from `../templates/dashboard-output.md`.
-   - **Known command name** (e.g., `cite-audit`, `consistency`) → Render the "Detailed help" template:
-     - Read `./{command}.md` for: description, argument-hint, and Usage Examples.
+   - **Empty** → render the "Help view" section (COMMANDS / ALIASES / GETTING HELP blocks; omit project-status header lines).
+   - **Known command name** (`cite-audit`, `consistency`, `falsifiability`, `argument-structure`, `scope`, `concept-import`, `counter-argument`, `cross-lang`, `propagate`) → render the "Detailed help" template:
+     - Read `./{command}.md` for: description, argument-hint, and Usage Examples block.
      - Read `../references/{command}-workflow.md` for: Anti-patterns and severity table.
      - Fill in the "Detailed help" template from `../templates/dashboard-output.md`.
-   - **Unknown token** → Render the "Unknown command" template from `../templates/dashboard-output.md`.
+   - **Unknown token** → render the "Unknown command" template from `../templates/dashboard-output.md`.
 
-3. Output the rendered help text. Done.
+3. Output the rendered help text. Done — do not run any audits.
+
+## Constraints
+
+- Read-only. Never write files or launch audits.
+- Only read the three files listed above (dashboard template, command file, workflow reference). No other reads.
