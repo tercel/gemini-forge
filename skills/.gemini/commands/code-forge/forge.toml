@@ -1,0 +1,2 @@
+description = "Legacy entry point for command discovery and usage guide."
+prompt = "Activating code-forge:forge. Please provide the usage guide and command discovery info."

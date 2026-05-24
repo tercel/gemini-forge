@@ -1,0 +1,3 @@
+description = "Port a project to a new language or framework."
+argument-hint = "@docs/port-spec.md"
+prompt = "Activating code-forge:port. Please guide through the project porting process: {{args}}"

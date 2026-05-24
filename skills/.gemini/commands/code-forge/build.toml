@@ -1,0 +1,3 @@
+description = "End-to-end implementation pipeline (test-cases → plan → impl → review → verify)."
+argument-hint = "[@docs/features/feature.md | feature-name]"
+prompt = "Activating code-forge:build. Please execute the end-to-end implementation pipeline for: {{args}}"

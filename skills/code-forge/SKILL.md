@@ -75,12 +75,13 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 **Procedure**: @./commands/parallel.md
 
 ### `/code-forge:forge`
-**Description**: Legacy entry point for command discovery and usage guide.
+**Description**: Smart dispatcher — routes any natural language input to the right code-forge skill, or shows help when invoked without arguments.
 **Procedure**: @./commands/forge.md
 
 ## Methodology & Frameworks
 
 - **Project Analysis Protocol (PA)**: @./references/shared/project-analysis.md
+- **Design-First Discipline**: @./references/shared/design-first.md
 - **Quality Review Matrix**: @./commands/review.md (15 Dimensions)
 - **Debugging Workflow**: @./commands/debug.md (4 Phases)
 

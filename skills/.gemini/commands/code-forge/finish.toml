@@ -1,0 +1,2 @@
+description = "Merge, PR, or finalize a completed feature branch."
+prompt = "Activating code-forge:finish. Please guide through the finalization and cleanup process."
