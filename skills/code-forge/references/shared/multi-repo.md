@@ -52,7 +52,7 @@ Display a summary table:
 
 **If any repo is not ready:**
 - Show which repos failed and why
-- Ask via `ask_user`:
+- Ask via `AskUserQuestion`:
   - **"Proceed with ready repos only"** — skip unready repos
   - **"Abort"** — exit, suggest how to make repos ready
 
@@ -62,7 +62,7 @@ Display a summary table:
 
 #### MR-3: Confirm Execution
 
-Use `ask_user`:
+Use `AskUserQuestion`:
 
 - **"Parallel Execution (Recommended)"** — dispatch all repo agents simultaneously
 - **"Sequential Execution"** — execute repos one by one (safer, easier to debug)
@@ -74,9 +74,9 @@ Use `ask_user`:
 
 ##### MR-4.1 Parallel Mode (Recommended)
 
-**Launch ALL repo sub-agents in a SINGLE message** using multiple `Agent` tool calls. This enables true parallel execution.
+**Launch ALL repo sub-agents in a SINGLE message** using multiple `generalist` tool calls. This enables true parallel execution.
 
-For each ready repo, spawn an `Agent` tool call with:
+For each ready repo, spawn a `generalist` tool call with:
 - `subagent_type`: `"general-purpose"`
 - `description`: `"{skill_name} {input_summary} in {repo_name}"`
 
@@ -117,7 +117,7 @@ Execute repos one by one in the order provided. For each repo:
 1. Display: "Starting: {repo_name} ({index}/{total})"
 2. Dispatch a single sub-agent (same prompt as MR-4.1)
 3. Wait for completion, display summary
-4. Ask via `ask_user`:
+4. Ask via `AskUserQuestion`:
    - **"Continue to next repo"** — proceed
    - **"Pause"** — exit loop, show resume instructions
 5. Repeat for next repo

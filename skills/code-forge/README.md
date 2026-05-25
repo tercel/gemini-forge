@@ -264,7 +264,7 @@ Auto-detects worktree context. Follows `code-forge:verify` discipline before any
 
 ---
 
-### parallel — Parallel Agent Dispatch
+### parallel — Parallel Sub-agent Dispatch
 
 Dispatches multiple sub-agents to work on independent problems simultaneously.
 

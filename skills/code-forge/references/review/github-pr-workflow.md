@@ -76,8 +76,8 @@ Spawn an `generalist` sub-agent with `subagent_type: "general-purpose"`.
 - Detected project type
 - **All 15 review dimensions** from the main SKILL.md's [Review Dimensions Reference]
 - The 4-tier severity definitions (blocker / critical / warning / suggestion)
-- **MANDATORY pre-analysis instruction:** *"Before applying any review dimension, read every changed file in full and build a call graph for every public method / exported function touched by the diff. Enumerate helpers called, validations performed, state mutations executed, errors raised, and external-input paths. Output as `METHOD_CHAINS` per `references/sub-agent-format.md`. Only after producing METHOD_CHAINS may you apply dimensions. Scope note: the graph is rooted at symbols MODIFIED by the diff — not every public symbol in every changed file. Do not trust method names or helper-function purity — open and read every callee. See the §Call-Graph Discipline section of the main review SKILL.md."*
-- **MANDATORY post-analysis instruction (especially important for GitHub PR mode — speculative findings on a public PR damage trust more than no findings):** *"After applying dimensions and BEFORE writing any finding, route every candidate through §Finding Suppression Gate (Gates 1-4) in the main review SKILL.md. Drop speculative findings ('could theoretically', 'if X ever happens'). Drop D1/D2 findings whose input source is internal/trusted under the project's threat model. Downgrade design-preference 'critical' to `warning`. Accept empty dimensions. Every `critical`/`blocker` finding MUST include a non-empty `evidence` field showing concrete reachability. The PR will be visible to the team — be conservative."*
+- **MANDATORY pre-analysis instruction:** *"Before applying any review dimension, read every changed file in full and build a call graph for every public method / exported function touched by the diff. Enumerate helpers called, validations performed, state mutations executed, errors raised, and external-input paths. Output as `METHOD_CHAINS` per `references/sub-agent-format.md`. Only after producing METHOD_CHAINS may you apply dimensions. Scope note: the graph is rooted at symbols MODIFIED by the diff — not every public symbol in every changed file. Do not trust method names or helper-function purity — open and read every callee. See `references/review/call-graph-discipline.md` for the full protocol."*
+- **MANDATORY post-analysis instruction (especially important for GitHub PR mode — speculative findings on a public PR damage trust more than no findings):** *"After applying dimensions and BEFORE writing any finding, route every candidate through `references/review/suppression-gates.md` (Gates 1-5 — Reachability, Trust Boundary, Severity Calibration, Quota Avoidance, Factual Verifiability). Drop speculative findings ('could theoretically', 'if X ever happens'). Drop D1/D2 findings whose input source is internal/trusted under the project's threat model. Downgrade design-preference 'critical' to `warning`. Accept empty dimensions. Every `critical`/`blocker` finding MUST include a non-empty `evidence` field showing concrete reachability. The PR will be visible to the team — be conservative."*
 - Instruction: **"Review ONLY the changes in this PR diff. Do not flag pre-existing issues. For each issue, specify severity, file path, line number/range, title, description, and fix suggestion. When an issue was discovered via the call graph, reference the relevant METHOD_CHAINS entry. For critical/blocker findings, the `evidence` field must show: (a) concrete trigger input, (b) observable wrong behavior, (c) trust-boundary argument for D2 / defensive-gap findings."**
 
 **Sub-agent must return the same structured format** as the main review skill (REVIEW_SUMMARY + per-dimension sections + **METHOD_CHAINS**). The orchestrator MUST verify METHOD_CHAINS is populated (covers every diff-modified public symbol) before posting to GitHub — a review posted to a public PR without the pre-analysis would be worse than no review because reviewers would wrongly trust its completeness. If the sub-agent fails the METHOD_CHAINS check twice, abort the post and surface the failure locally; do NOT post an incomplete review to the PR.
@@ -128,7 +128,7 @@ Format the comment body:
 
 {Final verdict: 1-2 sentences summarizing whether the PR is ready to merge}
 
-<sub>🤖 Generated with [Claude Code](https://claude.ai/code) · code-forge:review · 15 dimensions · {total_issues_posted} issues</sub>
+<sub>🤖 Generated with Gemini CLI · code-forge:review · 15 dimensions · {total_issues_posted} issues</sub>
 ```
 
 **Severity badges:**
@@ -148,7 +148,7 @@ https://github.com/{repo_slug}/blob/{head_sha}/{file_path}#L{start}-L{end}
 
 No issues found. Reviewed across 15 dimensions: functional correctness, security, resource management, code quality, architecture, performance, test coverage, simplification & anti-bloat, error handling, observability, standards, backward compatibility, maintainability, dependencies, and accessibility.
 
-<sub>🤖 Generated with [Claude Code](https://claude.ai/code) · code-forge:review</sub>
+<sub>🤖 Generated with Gemini CLI · code-forge:review</sub>
 ```
 
 #### 6.3 Post the Comment

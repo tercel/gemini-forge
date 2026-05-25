@@ -1,0 +1,2 @@
+description = "Enforce standalone Red-Green-Refactor cycle."
+prompt = "Activating code-forge:tdd. Please lead a TDD-driven development cycle."

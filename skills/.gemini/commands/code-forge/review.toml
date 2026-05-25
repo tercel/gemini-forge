@@ -1,0 +1,3 @@
+description = "Deep code review using the 15-Dimension Quality Matrix."
+argument-hint = "[feature-name | --project]"
+prompt = "Activating code-forge:review. Please perform a deep code review for: {{args}}"

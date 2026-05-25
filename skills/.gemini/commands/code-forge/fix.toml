@@ -1,0 +1,3 @@
+description = "Debug and fix a bug with upstream document tracing and state tracking."
+argument-hint = "\"bug description\""
+prompt = "Activating code-forge:fix. Please analyze the bug and implement a TDD-driven fix for: {{args}}"
