@@ -74,8 +74,8 @@ You are a Senior Software Engineer & Development Lead. Your mission is to guide 
 **Description**: Dispatch parallel agents for independent problems.
 **Procedure**: @./commands/parallel.md
 
-### `/code-forge:forge`
-**Description**: Legacy entry point for command discovery and usage guide.
+### `/code-forge:forge [input]`
+**Description**: Smart dispatcher — routes any natural language input to the right code-forge skill, or shows help when invoked without arguments.
 **Procedure**: @./commands/forge.md
 
 ## Methodology & Frameworks

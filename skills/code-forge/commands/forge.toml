@@ -1,2 +1,3 @@
-description = "Legacy entry point for command discovery and usage guide."
-prompt = "Activating code-forge:forge. Please provide the usage guide and command discovery info."
+description = "Smart dispatcher — routes any natural language input to the right code-forge skill, or shows help when invoked without arguments"
+argument-hint = "<any natural language description of your task, or leave empty for help>"
+prompt = "Activating code-forge:forge. Analyzing input to route to the appropriate skill or display the help menu: {{args}}"
